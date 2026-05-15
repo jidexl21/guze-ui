@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NaijaToUK — UK's First Subscription-Powered Supply Chain for Nigerian Imports</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;1,9..144,300&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../shared-styles.css" />
+  <style>
+    /* HERO */
+    .hero {
+      background: var(--green-deep);
+      color: var(--white);
+      position: relative;
+      overflow: hidden;
+      padding: var(--space-3xl) var(--space-xl) var(--space-2xl);
+      min-height: 92vh;
+      display: flex;
+      align-items: center;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse 70% 60% at 80% 50%, rgba(34,168,107,0.18) 0%, transparent 70%),
+                  radial-gradient(ellipse 40% 40% at 20% 80%, rgba(212,164,55,0.1) 0%, transparent 60%);
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-2xl);
+      align-items: center;
+      max-width: 1200px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+      width: 100%;
+    }
+
+    .hero-eyebrow {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      margin-bottom: var(--space-lg);
+      flex-wrap: wrap;
+    }
+
+    .hero-tag {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 500;
+      color: var(--gold-light);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      border: 1px solid rgba(212,164,55,0.3);
+      padding: 4px 12px;
+      border-radius: var(--radius-full);
+    }
+
+    .hero-flag {
+      font-size: 1.3rem;
+    }
+
+    .hero h1 {
+      font-family: var(--font-display);
+      font-size: clamp(2.4rem, 5vw, 4rem);
+      font-weight: 700;
+      line-height: 1.08;
+      color: var(--white);
+      margin-bottom: var(--space-lg);
+    }
+
+    .hero h1 em {
+      font-style: italic;
+      color: var(--gold-light);
+      font-weight: 300;
+    }
+
+    .hero-desc {
+      font-size: 1.05rem;
+      color: rgba(255,255,255,0.72);
+      line-height: 1.7;
+      margin-bottom: var(--space-xl);
+      max-width: 500px;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: var(--space-md);
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .hero-compliance {
+      margin-top: var(--space-xl);
+      padding-top: var(--space-lg);
+      border-top: 1px solid rgba(255,255,255,0.1);
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-md);
+      flex-wrap: wrap;
+    }
+
+    .compliance-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+
+    .compliance-item .shield {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.9rem;
+      flex-shrink: 0;
+    }
+
+    .compliance-item .shield.gold { background: rgba(212,164,55,0.2); border: 1.5px solid rgba(212,164,55,0.4); }
+    .compliance-item .shield.blue { background: rgba(41,128,185,0.2); border: 1.5px solid rgba(41,128,185,0.4); }
+    .compliance-item .shield.green { background: rgba(34,168,107,0.2); border: 1.5px solid rgba(34,168,107,0.4); }
+
+    .compliance-item .ci-label {
+      font-size: 0.78rem;
+      font-weight: 700;
+      font-family: var(--font-mono);
+      color: var(--white);
+    }
+    .compliance-item .ci-sub {
+      font-size: 0.7rem;
+      color: rgba(255,255,255,0.45);
+      text-decoration: underline;
+      text-decoration-style: dotted;
+    }
+
+    /* HERO VISUAL */
+    .hero-visual {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-md);
+    }
+
+    .container-viz {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: var(--radius-lg);
+      padding: var(--space-lg);
+    }
+
+    .container-label {
+      font-size: 0.75rem;
+      font-family: var(--font-mono);
+      color: rgba(255,255,255,0.5);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: var(--space-md);
+    }
+
+    .container-bar {
+      height: 48px;
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      display: flex;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      margin-bottom: var(--space-sm);
+    }
+
+    .container-segment {
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      font-weight: 600;
+      font-family: var(--font-mono);
+      color: rgba(0,0,0,0.7);
+      transition: all var(--transition);
+    }
+
+    .seg-1 { background: var(--green-bright); width: 35%; }
+    .seg-2 { background: var(--gold); width: 25%; }
+    .seg-3 { background: #4ECDC4; width: 18%; }
+    .seg-4 { background: #FF6B6B; width: 10%; }
+    .seg-empty { background: rgba(255,255,255,0.05); width: 12%; border-left: 2px dashed rgba(255,255,255,0.2); }
+
+    .container-legend {
+      display: flex;
+      gap: var(--space-md);
+      flex-wrap: wrap;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.72rem;
+      color: rgba(255,255,255,0.55);
+    }
+
+    .legend-dot {
+      width: 8px; height: 8px;
+      border-radius: 2px;
+    }
+
+    .savings-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-sm);
+    }
+
+    .savings-card {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: var(--radius-md);
+      padding: var(--space-md);
+    }
+
+    .savings-card .s-label {
+      font-size: 0.7rem;
+      color: rgba(255,255,255,0.45);
+      text-transform: uppercase;
+      font-family: var(--font-mono);
+      letter-spacing: 0.07em;
+      margin-bottom: 6px;
+    }
+
+    .savings-card .s-value {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--gold-light);
+    }
+
+    .savings-card .s-sub {
+      font-size: 0.72rem;
+      color: var(--green-light);
+      margin-top: 3px;
+    }
+
+    /* ANNOUNCEMENT BAR */
+    .announcement {
+      background: var(--gold);
+      color: var(--ink);
+      text-align: center;
+      padding: 10px var(--space-md);
+      font-size: 0.82rem;
+      font-weight: 600;
+    }
+
+    .announcement a { color: var(--green-deep); text-decoration: underline; }
+
+    /* PUBLIC NAV */
+    .pub-nav {
+      background: var(--green-deep);
+      padding: 0 var(--space-xl);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 68px;
+    }
+
+    .pub-nav-logo {
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--white);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .pub-nav-logo span {
+      font-weight: 300;
+      color: var(--gold-light);
+    }
+
+    .pub-nav-links {
+      display: flex;
+      align-items: center;
+      gap: var(--space-lg);
+    }
+
+    .pub-nav-links a {
+      color: rgba(255,255,255,0.7);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: color var(--transition);
+    }
+
+    .pub-nav-links a:hover { color: var(--white); }
+
+    /* HOW IT WORKS */
+    .section { padding: var(--space-3xl) var(--space-xl); }
+    .section-inner { max-width: 1200px; margin: 0 auto; }
+
+    .section-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--green-bright);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: var(--space-md);
+    }
+
+    .section-title {
+      font-family: var(--font-display);
+      font-size: clamp(1.8rem, 3vw, 2.6rem);
+      font-weight: 700;
+      color: var(--green-deep);
+      margin-bottom: var(--space-md);
+      line-height: 1.15;
+    }
+
+    .section-desc {
+      font-size: 1rem;
+      color: var(--muted);
+      max-width: 600px;
+      line-height: 1.7;
+      margin-bottom: var(--space-xl);
+    }
+
+    /* STEPS */
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--space-lg);
+      position: relative;
+    }
+
+    .step-card {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      padding: var(--space-lg);
+      border: 1px solid var(--cream-dark);
+      position: relative;
+    }
+
+    .step-num {
+      font-family: var(--font-display);
+      font-size: 3rem;
+      font-weight: 700;
+      color: var(--cream-dark);
+      line-height: 1;
+      margin-bottom: var(--space-sm);
+    }
+
+    .step-icon {
+      font-size: 1.8rem;
+      margin-bottom: var(--space-md);
+    }
+
+    .step-title {
+      font-family: var(--font-display);
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--green-deep);
+      margin-bottom: var(--space-sm);
+    }
+
+    .step-desc {
+      font-size: 0.85rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .step-actor {
+      margin-top: var(--space-sm);
+      font-size: 0.72rem;
+      font-family: var(--font-mono);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    /* BENEFITS */
+    .benefits-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: var(--space-lg);
+    }
+
+    .benefit-card {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      padding: var(--space-xl);
+      border: 1px solid var(--cream-dark);
+      border-top: 4px solid;
+    }
+
+    .benefit-card.retailer { border-top-color: var(--green-bright); }
+    .benefit-card.supplier { border-top-color: var(--gold); }
+    .benefit-card.platform { border-top-color: var(--blue-info); }
+
+    .benefit-who {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: var(--space-sm);
+    }
+
+    .benefit-card.retailer .benefit-who { color: var(--green-mid); }
+    .benefit-card.supplier .benefit-who { color: #9a7320; }
+    .benefit-card.platform .benefit-who { color: var(--blue-info); }
+
+    .benefit-title {
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--green-deep);
+      margin-bottom: var(--space-md);
+    }
+
+    .benefit-list {
+      list-style: none;
+    }
+
+    .benefit-list li {
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+      font-size: 0.88rem;
+      color: var(--ink-mid);
+      line-height: 1.5;
+      margin-bottom: 10px;
+    }
+
+    .benefit-list li::before {
+      content: '✓';
+      color: var(--green-bright);
+      font-weight: 700;
+      font-size: 0.9rem;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    /* COMPLIANCE SECTION */
+    .compliance-section {
+      background: var(--green-deep);
+      padding: var(--space-2xl) var(--space-xl);
+      color: var(--white);
+    }
+
+    .compliance-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: var(--space-2xl);
+      align-items: start;
+    }
+
+    .compliance-title {
+      font-family: var(--font-display);
+      font-size: 1.8rem;
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: var(--space-md);
+    }
+
+    .compliance-desc {
+      font-size: 0.9rem;
+      color: rgba(255,255,255,0.65);
+      line-height: 1.7;
+    }
+
+    .compliance-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-md);
+    }
+
+    .comp-card {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: var(--radius-lg);
+      padding: var(--space-lg);
+    }
+
+    .comp-card-icon {
+      font-size: 1.8rem;
+      margin-bottom: var(--space-sm);
+    }
+
+    .comp-card-title {
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--gold-light);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: var(--space-sm);
+    }
+
+    .comp-card-desc {
+      font-size: 0.82rem;
+      color: rgba(255,255,255,0.55);
+      line-height: 1.6;
+    }
+
+    .comp-card-link {
+      display: inline-block;
+      margin-top: 10px;
+      font-size: 0.75rem;
+      color: var(--green-light);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(93,214,160,0.3);
+      transition: border-color var(--transition);
+    }
+
+    .comp-card-link:hover { border-color: var(--green-light); }
+
+    /* CTA STRIP */
+    .cta-strip {
+      background: var(--gold);
+      padding: var(--space-2xl) var(--space-xl);
+      text-align: center;
+    }
+
+    .cta-strip h2 {
+      font-family: var(--font-display);
+      font-size: clamp(1.6rem, 3vw, 2.2rem);
+      font-weight: 700;
+      color: var(--green-deep);
+      margin-bottom: var(--space-md);
+    }
+
+    .cta-strip p {
+      font-size: 1rem;
+      color: rgba(10,56,40,0.7);
+      margin-bottom: var(--space-xl);
+    }
+
+    /* FOOTER */
+    .footer {
+      background: var(--ink);
+      color: rgba(255,255,255,0.55);
+      padding: var(--space-2xl) var(--space-xl) var(--space-lg);
+    }
+
+    .footer-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: var(--space-2xl);
+      margin-bottom: var(--space-2xl);
+    }
+
+    .footer-brand-name {
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--white);
+      margin-bottom: var(--space-sm);
+    }
+
+    .footer-tagline {
+      font-size: 0.85rem;
+      line-height: 1.6;
+      margin-bottom: var(--space-md);
+    }
+
+    .footer-col-title {
+      font-size: 0.78rem;
+      font-weight: 700;
+      font-family: var(--font-mono);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: rgba(255,255,255,0.8);
+      margin-bottom: var(--space-md);
+    }
+
+    .footer-links { list-style: none; }
+    .footer-links li { margin-bottom: 8px; }
+    .footer-links a {
+      font-size: 0.85rem;
+      color: rgba(255,255,255,0.45);
+      text-decoration: none;
+      transition: color var(--transition);
+    }
+    .footer-links a:hover { color: var(--green-light); }
+
+    .footer-bottom {
+      border-top: 1px solid rgba(255,255,255,0.08);
+      padding-top: var(--space-lg);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: var(--space-md);
+      font-size: 0.8rem;
+    }
+
+    .footer-badges { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    /* MODAL */
+    .modal-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(10,56,40,0.6);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-md);
+    }
+
+    .modal-overlay.open { display: flex; }
+
+    .modal-box {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      max-width: 600px;
+      width: 100%;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .modal-header {
+      padding: var(--space-lg);
+      border-bottom: 1px solid var(--cream-dark);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .modal-title {
+      font-family: var(--font-display);
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--green-deep);
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--muted);
+      width: 32px; height: 32px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 50%;
+      transition: background var(--transition);
+    }
+    .modal-close:hover { background: var(--cream); }
+
+    .modal-body {
+      padding: var(--space-lg);
+    }
+
+    @media (max-width: 900px) {
+      .hero-grid { grid-template-columns: 1fr; }
+      .hero-visual { display: none; }
+      .steps-grid { grid-template-columns: 1fr 1fr; }
+      .benefits-grid { grid-template-columns: 1fr; }
+      .compliance-inner { grid-template-columns: 1fr; }
+      .compliance-cards { grid-template-columns: 1fr; }
+      .footer-grid { grid-template-columns: 1fr 1fr; }
+      .pub-nav { padding: 0 var(--space-md); }
+      .pub-nav-links a:not(.btn) { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ANNOUNCEMENT BAR -->
+<div class="announcement">
+  🇬🇧 Now accepting applications for Q3 2025 export cohort — <a href="account.html">Register your interest →</a>
+</div>
+
+<!-- NAV -->
+<nav class="pub-nav">
+  <a href="index.html" class="pub-nav-logo">Naija<span>ToUK</span></a>
+  <div class="pub-nav-links">
+    <a href="#how-it-works">How It Works</a>
+    <a href="#benefits">Benefits</a>
+    <a href="#compliance">Compliance</a>
+    <a href="catalogue.html">Product Catalogue</a>
+    <a href="account.html" class="btn btn-ghost btn-sm" style="color:rgba(255,255,255,0.8);border-color:rgba(255,255,255,0.25);">Sign In</a>
+    <a href="account.html" class="btn btn-gold btn-sm">Start Importing</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-grid">
+    <div class="hero-content">
+      <div class="hero-eyebrow">
+        <span class="hero-flag">🇳🇬</span>
+        <span class="hero-tag">Britain First · Subscription-Powered</span>
+        <span class="hero-flag">🇬🇧</span>
+      </div>
+
+      <h1>The UK's First <em>Shared</em> Supply Chain for Nigerian Imports</h1>
+
+      <p class="hero-desc">
+        Split container costs with fellow importers. Import at retail scale with zero compliance headaches.
+        Fully DCTS duty-free, FSA & OPSS compliant — built from the ground up for the UK market.
+      </p>
+
+      <div class="hero-actions">
+        <a href="account.html" class="btn btn-gold btn-lg">Start Importing →</a>
+        <button class="btn btn-outline btn-lg" onclick="document.getElementById('how-it-works').scrollIntoView({behavior:'smooth'})" style="border-color:rgba(255,255,255,0.3);color:var(--white);">How It Works ↓</button>
+      </div>
+
+      <div class="hero-compliance">
+        <div class="compliance-item" onclick="openModal('fsa-modal')">
+          <div class="shield gold">🛡️</div>
+          <div>
+            <div class="ci-label">FSA Compliant</div>
+            <div class="ci-sub">What this means →</div>
+          </div>
+        </div>
+        <div class="compliance-item" onclick="openModal('opss-modal')">
+          <div class="shield blue">⚖️</div>
+          <div>
+            <div class="ci-label">OPSS Compliant</div>
+            <div class="ci-sub">What this means →</div>
+          </div>
+        </div>
+        <div class="compliance-item" onclick="openModal('dcts-modal')">
+          <div class="shield green">✅</div>
+          <div>
+            <div class="ci-label">DCTS Duty Free</div>
+            <div class="ci-sub">What this means →</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-visual">
+      <div class="container-viz">
+        <div class="container-label">📦 Live Container — Batch #NGU-2025-031 · Lagos → Tilbury</div>
+        <div class="container-bar">
+          <div class="container-segment seg-1">Ade Co. 35%</div>
+          <div class="container-segment seg-2">FabricNG 25%</div>
+          <div class="container-segment seg-3">SpiceHQ 18%</div>
+          <div class="container-segment seg-4">Crafts+ 10%</div>
+          <div class="container-segment seg-empty" style="display:flex;align-items:center;justify-content:center;font-size:0.65rem;color:rgba(255,255,255,0.3);">12%</div>
+        </div>
+        <div class="container-legend">
+          <div class="legend-item"><div class="legend-dot" style="background:var(--green-bright)"></div>Ade Co.</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--gold)"></div>FabricNG</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#4ECDC4"></div>SpiceHQ</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#FF6B6B"></div>Crafts+</div>
+          <div class="legend-item"><div class="legend-dot" style="background:rgba(255,255,255,0.15)"></div>Available</div>
+        </div>
+        <div style="margin-top:var(--space-md);font-size:0.72rem;color:rgba(255,255,255,0.35);font-family:var(--font-mono)">
+          ✅ Container considered full at 85% — 3 days to cut-off
+        </div>
+      </div>
+
+      <div class="savings-cards">
+        <div class="savings-card">
+          <div class="s-label">Your Savings</div>
+          <div class="s-value">£2,340</div>
+          <div class="s-sub">↑ vs solo shipment</div>
+        </div>
+        <div class="savings-card">
+          <div class="s-label">Cost Reduction</div>
+          <div class="s-value">38%</div>
+          <div class="s-sub">avg. this quarter</div>
+        </div>
+        <div class="savings-card">
+          <div class="s-label">Active Batches</div>
+          <div class="s-value">12</div>
+          <div class="s-sub">across all routes</div>
+        </div>
+        <div class="savings-card">
+          <div class="s-label">Fill Rate</div>
+          <div class="s-value">83%</div>
+          <div class="s-sub">↑ 5% this month</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="section" id="how-it-works" style="background:var(--white);">
+  <div class="section-inner">
+    <div class="section-eyebrow">Process</div>
+    <h2 class="section-title">From Lagos Market to UK Shelf in 4 Steps</h2>
+    <p class="section-desc">Our aggregated container model eliminates the biggest barrier to small-batch Nigerian exports — the prohibitive cost of private shipping containers.</p>
+
+    <div class="steps-grid">
+      <div class="step-card">
+        <div class="step-num">01</div>
+        <div class="step-icon">📋</div>
+        <div class="step-title">Register & List Products</div>
+        <p class="step-desc">Nigerian suppliers register, complete compliance verification, and list products with all documentation including UK lab tests and UKRP assignment.</p>
+        <div class="step-actor" style="color:var(--gold);">For: Suppliers</div>
+      </div>
+      <div class="step-card">
+        <div class="step-num">02</div>
+        <div class="step-icon">🛒</div>
+        <div class="step-title">Browse & Add to Batch</div>
+        <p class="step-desc">UK retailers browse the compliant product catalogue, calculate landed costs, and add items to an aggregation batch — sharing container space and cost.</p>
+        <div class="step-actor" style="color:var(--green-bright);">For: Retailers</div>
+      </div>
+      <div class="step-card">
+        <div class="step-num">03</div>
+        <div class="step-icon">🚢</div>
+        <div class="step-title">Container Aggregated & Shipped</div>
+        <p class="step-desc">Once the container reaches 85% fill, it is sealed and shipped from Lagos to Tilbury Port. Every importer gets real-time tracking visibility.</p>
+        <div class="step-actor" style="color:var(--blue-info);">Automated</div>
+      </div>
+      <div class="step-card">
+        <div class="step-num">04</div>
+        <div class="step-icon">🏪</div>
+        <div class="step-title">UK Clearance & Delivery</div>
+        <p class="step-desc">Goods clear UK customs duty-free under DCTS. Port handling, inland delivery coordinated. Retailers receive goods ready for retail shelving.</p>
+        <div class="step-actor" style="color:var(--green-bright);">For: Retailers</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BENEFITS -->
+<section class="section" id="benefits">
+  <div class="section-inner">
+    <div class="section-eyebrow">Benefits</div>
+    <h2 class="section-title">Built for Every Player in the Chain</h2>
+    <p class="section-desc">Whether you source, sell, or regulate — NaijaToUK delivers real value at every link of the supply chain.</p>
+
+    <div class="benefits-grid">
+      <div class="benefit-card retailer">
+        <div class="benefit-who">UK Retailers & Importers</div>
+        <div class="benefit-title">Import at Scale Without the Overheads</div>
+        <ul class="benefit-list">
+          <li>Split container costs — pay only for your space</li>
+          <li>Landed cost calculator before you commit</li>
+          <li>DCTS duty-free means zero tariff surprises</li>
+          <li>Full compliance documentation handled for you</li>
+          <li>Real-time batch & shipment tracking</li>
+          <li>Average 35–45% reduction vs. private container</li>
+        </ul>
+      </div>
+      <div class="benefit-card supplier">
+        <div class="benefit-who">Nigerian Exporters & Suppliers</div>
+        <div class="benefit-title">UK Market Access Without the Complexity</div>
+        <ul class="benefit-list">
+          <li>Access verified UK buyers in one platform</li>
+          <li>Compliance guidance for OPSS & FSA requirements</li>
+          <li>Transparent payout dashboard</li>
+          <li>No need to manage individual UK logistics</li>
+          <li>Grow export revenue without scaling overheads</li>
+          <li>Export documentation managed end-to-end</li>
+        </ul>
+      </div>
+      <div class="benefit-card platform">
+        <div class="benefit-who">Why NaijaToUK</div>
+        <div class="benefit-title">Britain First. Built for the UK Market.</div>
+        <ul class="benefit-list">
+          <li>Designed specifically for UK import regulations</li>
+          <li>OPSS supply chain compliance as standard</li>
+          <li>FSA-compliant food & cosmetics supply chain</li>
+          <li>Subscription model — predictable monthly costs</li>
+          <li>Admin compliance review with full audit trail</li>
+          <li>The UK's first platform of its kind for Nigerian imports</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- COMPLIANCE -->
+<section class="compliance-section" id="compliance">
+  <div class="compliance-inner">
+    <div>
+      <p class="section-eyebrow" style="color:var(--gold-light)">Regulatory Framework</p>
+      <h2 class="compliance-title">FSA &amp; OPSS Compliant Supply Chain</h2>
+      <p class="compliance-desc">NaijaToUK is built around the UK's regulatory landscape from day one. Every product, every supplier, every shipment is processed through our compliance layer — so you never have to worry about border holds or enforcement actions.</p>
+      <div style="margin-top:var(--space-xl)">
+        <a href="account.html" class="btn btn-gold">Get Started →</a>
+      </div>
+    </div>
+    <div class="compliance-cards">
+      <div class="comp-card">
+        <div class="comp-card-icon">🍏</div>
+        <div class="comp-card-title">FSA Compliant</div>
+        <p class="comp-card-desc">The Food Standards Agency (FSA) sets the rules for food safety in England, Wales, and Northern Ireland. All food and beverage products on our platform meet FSA import requirements, including traceability, labelling, and hygiene standards.</p>
+        <a href="https://www.food.gov.uk/" target="_blank" class="comp-card-link">Learn about FSA requirements ↗</a>
+      </div>
+      <div class="comp-card">
+        <div class="comp-card-icon">⚖️</div>
+        <div class="comp-card-title">OPSS Compliant</div>
+        <p class="comp-card-desc">The Office for Product Safety & Standards (OPSS) is the UK's national product regulator. Our platform ensures all non-food products meet UK conformity assessments, safety standards, and have an appointed UK Responsible Person (UKRP).</p>
+        <a href="https://www.gov.uk/government/organisations/office-for-product-safety-and-standards" target="_blank" class="comp-card-link">Learn about OPSS ↗</a>
+      </div>
+      <div class="comp-card">
+        <div class="comp-card-icon">✅</div>
+        <div class="comp-card-title">DCTS Duty Free</div>
+        <p class="comp-card-desc">Nigeria qualifies under the UK's Developing Countries Trading Scheme (DCTS), enabling zero or reduced tariffs on a wide range of eligible goods. We verify DCTS eligibility for every product and handle origin certification.</p>
+        <a href="https://www.gov.uk/guidance/developing-countries-trading-scheme" target="_blank" class="comp-card-link">Check DCTS eligibility ↗</a>
+      </div>
+      <div class="comp-card">
+        <div class="comp-card-icon">🏛️</div>
+        <div class="comp-card-title">UK Border Ready</div>
+        <p class="comp-card-desc">Every shipment includes pre-cleared customs documentation, commodity codes, certificates of origin, and electronic import declarations — ensuring smooth passage through Tilbury and other UK entry ports.</p>
+        <a href="#" class="comp-card-link">Our documentation process ↗</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA STRIP -->
+<div class="cta-strip">
+  <h2>Ready to Start Importing Smarter?</h2>
+  <p>Join hundreds of UK retailers already saving on Nigerian imports</p>
+  <div style="display:flex;gap:var(--space-md);justify-content:center;flex-wrap:wrap;">
+    <a href="account.html?type=retailer" class="btn btn-primary btn-lg">Start Importing →</a>
+    <a href="account.html?type=supplier" class="btn btn-outline btn-lg">Register as Supplier →</a>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand-name">NaijaToUK</div>
+        <p class="footer-tagline">The UK's first subscription-powered supply chain for Nigerian imports. Fully DCTS duty-free and optimised for retail scale.</p>
+        <div class="footer-badges">
+          <span class="badge badge-green">🇳🇬 → 🇬🇧</span>
+          <span class="badge badge-gold">DCTS Verified</span>
+          <span class="badge badge-blue">OPSS Registered</span>
+        </div>
+      </div>
+      <div>
+        <div class="footer-col-title">Platform</div>
+        <ul class="footer-links">
+          <li><a href="catalogue.html">Product Catalogue</a></li>
+          <li><a href="calculator.html">Landed Cost Calculator</a></li>
+          <li><a href="aggregation.html">Container Tracker</a></li>
+          <li><a href="account.html">Sign In</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-col-title">Compliance</div>
+        <ul class="footer-links">
+          <li><a href="https://www.food.gov.uk/">FSA Information</a></li>
+          <li><a href="https://www.gov.uk/government/organisations/office-for-product-safety-and-standards">OPSS Information</a></li>
+          <li><a href="https://www.gov.uk/guidance/developing-countries-trading-scheme">DCTS Guide</a></li>
+          <li><a href="#">UK Import Requirements</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-col-title">Company</div>
+        <ul class="footer-links">
+          <li><a href="#">About Us</a></li>
+          <li><a href="#">Contact</a></li>
+          <li><a href="#">Terms of Service</a></li>
+          <li><a href="#">Privacy Policy</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div>© 2025 NaijaToUK Ltd. Registered in England & Wales.</div>
+      <div>Registered for OPSS compliance. FSA-approved supply chain participant.</div>
+    </div>
+  </div>
+</footer>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="fsa-modal" onclick="if(event.target===this)closeModal('fsa-modal')">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title">🍏 What is FSA Compliance?</div>
+      <button class="modal-close" onclick="closeModal('fsa-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="margin-bottom:var(--space-md);color:var(--ink-mid);line-height:1.7">The <strong>Food Standards Agency (FSA)</strong> is the government body responsible for food safety and hygiene across England, Wales, and Northern Ireland.</p>
+      <p style="margin-bottom:var(--space-md);color:var(--ink-mid);line-height:1.7">For Nigerian food imports to reach UK retail shelves, they must comply with:</p>
+      <ul style="margin-bottom:var(--space-md);padding-left:var(--space-md);color:var(--ink-mid);line-height:2">
+        <li>Correct UK food labelling standards (ingredient listing, allergens, weights)</li>
+        <li>Safe transport and storage temperature chains</li>
+        <li>Traceability records from origin to point of sale</li>
+        <li>Microbiological safety standards for high-risk categories</li>
+        <li>Pesticide maximum residue levels (MRLs)</li>
+      </ul>
+      <p style="color:var(--muted);font-size:0.85rem">NaijaToUK pre-screens all food products against FSA requirements before they are listed on the platform.</p>
+      <div style="margin-top:var(--space-lg)">
+        <a href="https://www.food.gov.uk/business-guidance/imports-and-exports" target="_blank" class="btn btn-primary btn-sm">Visit FSA Website ↗</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="opss-modal" onclick="if(event.target===this)closeModal('opss-modal')">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title">⚖️ What is OPSS Compliance?</div>
+      <button class="modal-close" onclick="closeModal('opss-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="margin-bottom:var(--space-md);color:var(--ink-mid);line-height:1.7">The <strong>Office for Product Safety & Standards (OPSS)</strong> is the UK's national product safety regulator, sitting within the Department for Business & Trade.</p>
+      <p style="margin-bottom:var(--space-md);color:var(--ink-mid);line-height:1.7">For non-food consumer goods (cosmetics, textiles, electronics, etc.) imported from Nigeria, OPSS requires:</p>
+      <ul style="margin-bottom:var(--space-md);padding-left:var(--space-md);color:var(--ink-mid);line-height:2">
+        <li>UK Conformity Assessment (UKCA) marking where applicable</li>
+        <li>Appointment of a <strong>UK Responsible Person (UKRP)</strong></li>
+        <li>UK lab test reports from accredited testing facilities</li>
+        <li>Safety data sheets and technical documentation</li>
+        <li>Registration on the UK product safety database</li>
+      </ul>
+      <p style="color:var(--muted);font-size:0.85rem">Every supplier on NaijaToUK must submit and have approved their UKRP assignment and lab test reports before listing products.</p>
+      <div style="margin-top:var(--space-lg)">
+        <a href="https://www.gov.uk/government/organisations/office-for-product-safety-and-standards" target="_blank" class="btn btn-primary btn-sm">Visit OPSS Website ↗</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="dcts-modal" onclick="if(event.target===this)closeModal('dcts-modal')">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title">✅ What is DCTS Duty Free?</div>
+      <button class="modal-close" onclick="closeModal('dcts-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="margin-bottom:var(--space-md);color:var(--ink-mid);line-height:1.7">The UK's <strong>Developing Countries Trading Scheme (DCTS)</strong> provides preferential tariff rates for imports from developing nations — including Nigeria.</p>
+      <p style="margin-bottom:var(--space-md);color:var(--ink-mid);line-height:1.7">Under DCTS, many Nigerian goods qualify for:</p>
+      <ul style="margin-bottom:var(--space-md);padding-left:var(--space-md);color:var(--ink-mid);line-height:2">
+        <li>Zero-rated import duty on eligible product categories</li>
+        <li>Simplified customs procedures for qualifying goods</li>
+        <li>Reduced tariffs on textiles, food, handcrafts, and cosmetics</li>
+      </ul>
+      <p style="margin-bottom:var(--space-md);color:var(--ink-mid);line-height:1.7">NaijaToUK verifies DCTS eligibility for every product using the UK Global Tariff database and manages certificates of origin on your behalf.</p>
+      <p style="color:var(--muted);font-size:0.85rem">This is one of the primary cost advantages of importing Nigerian goods through our platform vs. third-country routes.</p>
+      <div style="margin-top:var(--space-lg)">
+        <a href="https://www.gov.uk/guidance/developing-countries-trading-scheme" target="_blank" class="btn btn-primary btn-sm">Learn About DCTS ↗</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function openModal(id) { document.getElementById(id).classList.add('open'); }
+  function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
+    }
+  });
+</script>
+</body>
+</html>

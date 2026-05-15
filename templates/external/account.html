@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign In / Create Account — NaijaToUK</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;1,9..144,300&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../shared-styles.css" />
+  <style>
+    body { background: var(--green-deep); min-height: 100vh; display: flex; flex-direction: column; }
+
+    .auth-wrapper {
+      flex: 1;
+      display: flex;
+      align-items: stretch;
+      min-height: 100vh;
+    }
+
+    .auth-brand {
+      width: 420px;
+      flex-shrink: 0;
+      background: linear-gradient(160deg, var(--green-deep) 0%, var(--green-mid) 100%);
+      padding: var(--space-2xl) var(--space-xl);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border-right: 1px solid rgba(255,255,255,0.08);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .auth-brand::before {
+      content: '';
+      position: absolute;
+      bottom: -80px; right: -80px;
+      width: 320px; height: 320px;
+      border-radius: 50%;
+      background: rgba(93,214,160,0.08);
+    }
+
+    .brand-logo {
+      font-family: var(--font-display);
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--white);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-logo span { color: var(--gold-light); font-weight: 300; }
+
+    .brand-tagline {
+      font-family: var(--font-display);
+      font-size: 1.9rem;
+      font-weight: 700;
+      color: var(--white);
+      line-height: 1.2;
+      margin-bottom: var(--space-md);
+    }
+
+    .brand-tagline em { font-style: italic; color: var(--gold-light); font-weight: 300; }
+
+    .brand-desc {
+      font-size: 0.88rem;
+      color: rgba(255,255,255,0.55);
+      line-height: 1.7;
+      margin-bottom: var(--space-xl);
+    }
+
+    .brand-badges {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .brand-badge {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: var(--radius-md);
+    }
+
+    .brand-badge .bb-icon { font-size: 1.1rem; }
+    .brand-badge .bb-text { font-size: 0.8rem; color: rgba(255,255,255,0.7); }
+    .brand-badge .bb-text strong { color: var(--white); display: block; font-size: 0.82rem; }
+
+    .auth-panel {
+      flex: 1;
+      background: var(--cream);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-2xl) var(--space-xl);
+    }
+
+    .auth-box {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      padding: var(--space-2xl);
+      width: 100%;
+      max-width: 480px;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .auth-toggle {
+      display: flex;
+      background: var(--cream);
+      border-radius: var(--radius-full);
+      padding: 4px;
+      margin-bottom: var(--space-xl);
+    }
+
+    .auth-toggle-btn {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      background: none;
+      border-radius: var(--radius-full);
+      font-family: var(--font-body);
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+
+    .auth-toggle-btn.active {
+      background: var(--white);
+      color: var(--green-deep);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .auth-section { display: none; }
+    .auth-section.visible { display: block; }
+
+    .auth-title {
+      font-family: var(--font-display);
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--green-deep);
+      margin-bottom: 4px;
+    }
+
+    .auth-subtitle {
+      font-size: 0.88rem;
+      color: var(--muted);
+      margin-bottom: var(--space-xl);
+    }
+
+    /* Account type selector */
+    .account-types {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-sm);
+      margin-bottom: var(--space-lg);
+    }
+
+    .account-type-card {
+      border: 2px solid var(--cream-dark);
+      border-radius: var(--radius-md);
+      padding: var(--space-md);
+      cursor: pointer;
+      transition: all var(--transition);
+      position: relative;
+    }
+
+    .account-type-card:hover { border-color: var(--green-bright); }
+    .account-type-card.selected { border-color: var(--green-bright); background: rgba(34,168,107,0.05); }
+
+    .account-type-card .at-icon { font-size: 1.6rem; margin-bottom: 6px; }
+
+    .account-type-card .at-name {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--green-deep);
+      margin-bottom: 4px;
+    }
+
+    .account-type-card .at-desc {
+      font-size: 0.75rem;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    .account-type-card .at-check {
+      position: absolute;
+      top: 10px; right: 10px;
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: var(--green-bright);
+      color: white;
+      font-size: 0.65rem;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+    }
+
+    .account-type-card.selected .at-check { display: flex; }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      margin: var(--space-lg) 0;
+      color: var(--muted);
+      font-size: 0.8rem;
+    }
+
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--cream-dark);
+    }
+
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-sm); }
+
+    .auth-submit {
+      width: 100%;
+      padding: 14px;
+      background: var(--green-deep);
+      color: var(--white);
+      border: none;
+      border-radius: var(--radius-full);
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition);
+      margin-top: var(--space-md);
+    }
+
+    .auth-submit:hover {
+      background: var(--green-mid);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .auth-footer-note {
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-top: var(--space-md);
+    }
+
+    .auth-footer-note a { color: var(--green-mid); text-decoration: none; font-weight: 600; }
+
+    .checkbox-group {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-top: var(--space-md);
+    }
+
+    .checkbox-group input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      margin-top: 2px;
+      accent-color: var(--green-bright);
+      flex-shrink: 0;
+    }
+
+    .checkbox-group label {
+      font-size: 0.8rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .checkbox-group label a { color: var(--green-mid); }
+
+    .field-extra-fields { display: none; }
+    .field-extra-fields.visible { display: block; }
+
+    @media (max-width: 800px) {
+      .auth-brand { display: none; }
+      .auth-panel { padding: var(--space-md); }
+    }
+  </style>
+</head>
+<body>
+<div class="auth-wrapper">
+  <!-- Brand Panel -->
+  <div class="auth-brand">
+    <div>
+      <a href="index.html" class="brand-logo">Naija<span>ToUK</span></a>
+    </div>
+    <div>
+      <h2 class="brand-tagline">Import <em>Smarter.</em><br>Ship Shared.</h2>
+      <p class="brand-desc">The UK's first subscription-powered supply chain for Nigerian imports. DCTS duty-free, FSA & OPSS compliant — built for retail scale.</p>
+      <div class="brand-badges">
+        <div class="brand-badge">
+          <div class="bb-icon">✅</div>
+          <div class="bb-text"><strong>DCTS Duty Free</strong>Zero tariffs on eligible Nigerian goods</div>
+        </div>
+        <div class="brand-badge">
+          <div class="bb-icon">🛡️</div>
+          <div class="bb-text"><strong>FSA & OPSS Compliant</strong>Full supply chain compliance as standard</div>
+        </div>
+        <div class="brand-badge">
+          <div class="bb-icon">📦</div>
+          <div class="bb-text"><strong>Shared Container Model</strong>Save 35–45% vs private shipment</div>
+        </div>
+        <div class="brand-badge">
+          <div class="bb-icon">🇬🇧</div>
+          <div class="bb-text"><strong>Britain First</strong>Built for UK import regulations</div>
+        </div>
+      </div>
+    </div>
+    <div style="font-size:0.75rem;color:rgba(255,255,255,0.3);">© 2025 NaijaToUK Ltd</div>
+  </div>
+
+  <!-- Auth Panel -->
+  <div class="auth-panel">
+    <div class="auth-box">
+      <!-- Toggle -->
+      <div class="auth-toggle">
+        <button class="auth-toggle-btn active" id="signin-toggle" onclick="showPanel('signin')">Sign In</button>
+        <button class="auth-toggle-btn" id="signup-toggle" onclick="showPanel('signup')">Create Account</button>
+      </div>
+
+      <!-- SIGN IN SECTION -->
+      <div class="auth-section visible" id="signin-section">
+        <h1 class="auth-title">Welcome back</h1>
+        <p class="auth-subtitle">Sign in to your NaijaToUK account</p>
+
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <input type="email" class="form-control" placeholder="you@company.com" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" style="display:flex;justify-content:space-between;">
+            Password
+            <a href="#" style="font-weight:400;color:var(--green-mid);font-size:0.8rem;">Forgot password?</a>
+          </label>
+          <input type="password" class="form-control" placeholder="••••••••" />
+        </div>
+
+        <button class="auth-submit">Sign In →</button>
+
+        <div class="divider">or</div>
+        <p class="auth-footer-note">Don't have an account? <a onclick="showPanel('signup')">Create one →</a></p>
+      </div>
+
+      <!-- SIGN UP SECTION -->
+      <div class="auth-section" id="signup-section">
+        <h1 class="auth-title">Create Account</h1>
+        <p class="auth-subtitle">Join the UK's first shared Nigerian import platform</p>
+
+        <!-- Account Type -->
+        <div style="margin-bottom:var(--space-md)">
+          <div class="form-label">Account Type</div>
+          <div class="account-types">
+            <div class="account-type-card selected" onclick="selectType(this, 'retailer')" data-type="retailer">
+              <div class="at-check">✓</div>
+              <div class="at-icon">🏪</div>
+              <div class="at-name">UK Retailer / Importer</div>
+              <div class="at-desc">Browse and order Nigerian goods. Share container costs.</div>
+            </div>
+            <div class="account-type-card" onclick="selectType(this, 'supplier')" data-type="supplier">
+              <div class="at-check">✓</div>
+              <div class="at-icon">🏭</div>
+              <div class="at-name">Nigerian Supplier / Exporter</div>
+              <div class="at-desc">List your products and export to the UK market.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Common Fields -->
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">First Name</label>
+            <input type="text" class="form-control" placeholder="Adebayo" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Last Name</label>
+            <input type="text" class="form-control" placeholder="Okafor" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Business / Company Name</label>
+          <input type="text" class="form-control" placeholder="Your company name" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <input type="email" class="form-control" placeholder="you@company.com" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Phone Number</label>
+          <input type="tel" class="form-control" placeholder="+44 or +234..." />
+        </div>
+
+        <!-- Retailer-specific -->
+        <div class="field-extra-fields visible" id="retailer-fields">
+          <div class="form-group">
+            <label class="form-label">UK Business Registration Number</label>
+            <input type="text" class="form-control" placeholder="e.g. 12345678" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">UK VAT Number (if applicable)</label>
+            <input type="text" class="form-control" placeholder="GB 123 4567 89" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Primary Product Categories of Interest</label>
+            <select class="form-control">
+              <option value="">Select category...</option>
+              <option>Cosmetics & Beauty</option>
+              <option>Textiles & Fabrics</option>
+              <option>Handcrafts & Art</option>
+              <option>Foods & Spices</option>
+              <option>Multiple Categories</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Supplier-specific -->
+        <div class="field-extra-fields" id="supplier-fields">
+          <div class="form-group">
+            <label class="form-label">Nigerian Business Registration (CAC)</label>
+            <input type="text" class="form-control" placeholder="CAC/BN/..." />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Export Product Categories</label>
+            <select class="form-control">
+              <option value="">Select your main category...</option>
+              <option>Cosmetics & Beauty</option>
+              <option>Textiles & Fabrics</option>
+              <option>Handcrafts & Art</option>
+              <option>Foods & Spices</option>
+              <option>Multiple Categories</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Do you have a UK Responsible Person (UKRP)?</label>
+            <select class="form-control">
+              <option value="">Select...</option>
+              <option>Yes, I have a UKRP assigned</option>
+              <option>No — I need help finding one</option>
+              <option>Not sure what this is</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" class="form-control" placeholder="At least 8 characters" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Confirm Password</label>
+          <input type="password" class="form-control" placeholder="Repeat password" />
+        </div>
+
+        <div class="checkbox-group">
+          <input type="checkbox" id="terms" />
+          <label for="terms">I agree to the <a href="#">Terms of Service</a>, <a href="#">Privacy Policy</a>, and confirm that all business information provided is accurate.</label>
+        </div>
+
+        <div class="checkbox-group">
+          <input type="checkbox" id="compliance-agree" />
+          <label for="compliance-agree">I understand that listing products or placing orders is subject to OPSS and FSA compliance verification.</label>
+        </div>
+
+        <button class="auth-submit">Create Account →</button>
+
+        <p class="auth-footer-note" style="margin-top:var(--space-md)">Already have an account? <a onclick="showPanel('signin')">Sign in →</a></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function showPanel(panel) {
+    document.getElementById('signin-section').classList.toggle('visible', panel === 'signin');
+    document.getElementById('signup-section').classList.toggle('visible', panel === 'signup');
+    document.getElementById('signin-toggle').classList.toggle('active', panel === 'signin');
+    document.getElementById('signup-toggle').classList.toggle('active', panel === 'signup');
+  }
+
+  function selectType(card, type) {
+    document.querySelectorAll('.account-type-card').forEach(c => c.classList.remove('selected'));
+    card.classList.add('selected');
+    document.getElementById('retailer-fields').classList.toggle('visible', type === 'retailer');
+    document.getElementById('supplier-fields').classList.toggle('visible', type === 'supplier');
+  }
+
+  // Read URL param
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('type')) {
+    showPanel('signup');
+    if (params.get('type') === 'supplier') {
+      document.querySelectorAll('.account-type-card').forEach(c => {
+        c.classList.toggle('selected', c.dataset.type === 'supplier');
+      });
+      document.getElementById('retailer-fields').classList.remove('visible');
+      document.getElementById('supplier-fields').classList.add('visible');
+    }
+  }
+</script>
+</body>
+</html>

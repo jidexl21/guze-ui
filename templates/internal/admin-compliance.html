@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Compliance Review — NaijaToUK</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../shared-styles.css" />
+  <style>
+    .admin-sidebar { background: #0F1A14; }
+
+    .review-queue-item {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--cream-dark);
+      padding: var(--space-lg);
+      margin-bottom: var(--space-md);
+      transition: box-shadow var(--transition);
+    }
+
+    .review-queue-item:hover { box-shadow: var(--shadow-md); }
+
+    .review-queue-item.urgent { border-left: 4px solid var(--red-alert); }
+    .review-queue-item.pending { border-left: 4px solid var(--amber); }
+    .review-queue-item.approved { border-left: 4px solid var(--green-bright); }
+
+    .rq-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: var(--space-md);
+      margin-bottom: var(--space-md);
+    }
+
+    .rq-doc-type {
+      font-size: 0.72rem;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .rq-doc-name {
+      font-family: var(--font-display);
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--green-deep);
+      margin-bottom: 4px;
+    }
+
+    .rq-supplier {
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+
+    .rq-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .rq-details {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--space-sm);
+      background: var(--cream);
+      border-radius: var(--radius-sm);
+      padding: var(--space-md);
+      margin-bottom: var(--space-md);
+    }
+
+    .rq-detail {
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    .rq-detail strong {
+      display: block;
+      color: var(--ink-mid);
+      font-size: 0.82rem;
+      margin-top: 2px;
+    }
+
+    .rq-notes {
+      font-size: 0.82rem;
+      color: var(--ink-mid);
+      background: rgba(255,255,255,0.8);
+      border: 1px solid var(--cream-dark);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      line-height: 1.5;
+    }
+
+    .admin-stats {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: var(--space-sm);
+      margin-bottom: var(--space-lg);
+    }
+
+    .admin-stat {
+      background: var(--white);
+      border-radius: var(--radius-md);
+      padding: var(--space-md);
+      border: 1px solid var(--cream-dark);
+      text-align: center;
+    }
+
+    .admin-stat-num {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      font-weight: 700;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .admin-stat-label {
+      font-size: 0.72rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-family: var(--font-mono);
+    }
+
+    .reject-modal-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(6px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .reject-modal-overlay.open { display: flex; }
+
+    .reject-modal {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      padding: var(--space-xl);
+      width: 480px;
+      max-width: 95vw;
+      box-shadow: var(--shadow-lg);
+    }
+
+    @media (max-width: 900px) {
+      .admin-stats { grid-template-columns: 1fr 1fr 1fr; }
+      .rq-details { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+  <!-- ADMIN SIDEBAR -->
+  <nav class="sidebar admin-sidebar">
+    <div class="sidebar-logo" style="border-bottom-color:rgba(255,255,255,0.06)">
+      <a href="../external/index.html" style="font-family:var(--font-display);font-size:1.1rem;font-weight:700;color:white;text-decoration:none;display:flex;align-items:center;gap:8px;">
+        <span>🛡️</span> Admin Panel
+      </a>
+    </div>
+    <div class="sidebar-nav">
+      <div class="sidebar-section-label">Compliance</div>
+      <a href="admin-compliance.html" class="sidebar-link active"><span class="icon">📋</span> Document Review</a>
+      <a href="#" class="sidebar-link"><span class="icon">⚖️</span> OPSS Approvals</a>
+      <a href="#" class="sidebar-link"><span class="icon">🛡️</span> FSA Verifications</a>
+      <a href="#" class="sidebar-link"><span class="icon">✅</span> DCTS Eligibility</a>
+      <div class="sidebar-section-label">Platform</div>
+      <a href="#" class="sidebar-link"><span class="icon">👥</span> Suppliers</a>
+      <a href="#" class="sidebar-link"><span class="icon">🏪</span> Retailers</a>
+      <a href="#" class="sidebar-link"><span class="icon">📦</span> Batches</a>
+      <a href="#" class="sidebar-link"><span class="icon">📊</span> Reports</a>
+      <div class="sidebar-section-label">System</div>
+      <a href="#" class="sidebar-link"><span class="icon">⚙️</span> Settings</a>
+      <a href="#" class="sidebar-link"><span class="icon">🔒</span> Audit Log</a>
+    </div>
+    <div class="sidebar-footer" style="border-top-color:rgba(255,255,255,0.06)">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <div style="width:34px;height:34px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-size:0.82rem;color:var(--ink);font-weight:700">SA</div>
+        <div><div style="font-size:0.82rem;color:white;font-weight:600">Sarah Adeyemi</div><div style="font-size:0.7rem;color:rgba(255,255,255,0.35)">Compliance Manager</div></div>
+      </div>
+      <a href="../external/index.html" class="sidebar-link" style="font-size:0.8rem;padding:6px 16px"><span class="icon">↩️</span> Sign Out</a>
+    </div>
+  </nav>
+
+  <div class="main-content">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Compliance Review Queue</div>
+        <div class="page-subtitle">Review, approve, reject or request changes for supplier documentation</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span class="badge badge-red">● 3 Urgent</span>
+        <button class="btn btn-ghost btn-sm">📥 Export Report</button>
+      </div>
+    </div>
+
+    <div class="page-body">
+
+      <!-- ADMIN STATS -->
+      <div class="admin-stats">
+        <div class="admin-stat">
+          <div class="admin-stat-num" style="color:var(--amber)">12</div>
+          <div class="admin-stat-label">Pending Review</div>
+        </div>
+        <div class="admin-stat">
+          <div class="admin-stat-num" style="color:var(--red-alert)">3</div>
+          <div class="admin-stat-label">Urgent / Overdue</div>
+        </div>
+        <div class="admin-stat">
+          <div class="admin-stat-num" style="color:var(--green-bright)">47</div>
+          <div class="admin-stat-label">Approved (30d)</div>
+        </div>
+        <div class="admin-stat">
+          <div class="admin-stat-num" style="color:var(--red-alert)">8</div>
+          <div class="admin-stat-label">Rejected (30d)</div>
+        </div>
+        <div class="admin-stat">
+          <div class="admin-stat-num" style="color:var(--blue-info)">5</div>
+          <div class="admin-stat-label">Changes Requested</div>
+        </div>
+      </div>
+
+      <!-- FILTERS -->
+      <div style="display:flex;gap:var(--space-sm);margin-bottom:var(--space-lg);flex-wrap:wrap;align-items:center">
+        <input type="text" class="form-control" placeholder="🔍 Search supplier, document type..." style="flex:1;max-width:300px;font-size:0.85rem" />
+        <select class="form-control" style="width:auto;font-size:0.85rem">
+          <option>All doc types</option>
+          <option>UK Lab Test Report</option>
+          <option>UKRP Assignment</option>
+          <option>OPSS Registration</option>
+          <option>FSA Certificate</option>
+          <option>Certificate of Origin</option>
+        </select>
+        <select class="form-control" style="width:auto;font-size:0.85rem">
+          <option>All statuses</option>
+          <option>Pending</option>
+          <option>Urgent</option>
+          <option>Changes Requested</option>
+        </select>
+        <select class="form-control" style="width:auto;font-size:0.85rem">
+          <option>Newest first</option>
+          <option>Oldest first</option>
+          <option>Urgent first</option>
+        </select>
+      </div>
+
+      <!-- REVIEW ITEMS -->
+
+      <!-- URGENT: Lab Report -->
+      <div class="review-queue-item urgent">
+        <div class="rq-header">
+          <div>
+            <div class="rq-doc-type">🧪 UK Lab Test Report</div>
+            <div class="rq-doc-name">Cosmetic Safety Assessment — Whipped Shea Butter</div>
+            <div class="rq-supplier">Supplier: AfroCare Naturals, Lagos &nbsp;·&nbsp; Submitted: 08 Jul 2025</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+            <span class="badge badge-red">🔴 Urgent — 3 days overdue</span>
+            <span class="badge badge-amber">Blocks 1 product listing</span>
+          </div>
+        </div>
+
+        <div class="rq-details">
+          <div class="rq-detail">Doc Type<strong>UK Lab Test Report</strong></div>
+          <div class="rq-detail">Lab Reference<strong>UKCAS-2025-08471</strong></div>
+          <div class="rq-detail">Testing Body<strong>SGS UK Ltd, Ellesmere Port</strong></div>
+          <div class="rq-detail">Product Category<strong>Cosmetics — Skin Care</strong></div>
+        </div>
+
+        <div class="rq-notes" style="margin-bottom:var(--space-md)">
+          ⚠️ <strong>Admin Note:</strong> Lab report covers preservative levels and heavy metal content. Nickel content reading at 0.98 ppm — within EU/UK limits (1 ppm) but borderline. Verify annexe B of the report matches product formulation submitted. Check report validity date.
+        </div>
+
+        <div class="rq-actions">
+          <button class="btn btn-primary btn-sm" onclick="approveDoc(this, 'Whipped Shea Butter Lab Report')">✓ Approve</button>
+          <button class="btn btn-ghost btn-sm" style="border-color:var(--amber);color:var(--amber)" onclick="openRejectModal('changes')">✏️ Request Changes</button>
+          <button class="btn btn-ghost btn-sm" style="border-color:var(--red-alert);color:var(--red-alert)" onclick="openRejectModal('reject')">✕ Reject</button>
+          <a href="#" class="btn btn-ghost btn-sm">📄 View Document</a>
+        </div>
+      </div>
+
+      <!-- PENDING: UKRP Assignment -->
+      <div class="review-queue-item pending">
+        <div class="rq-header">
+          <div>
+            <div class="rq-doc-type">📋 UKRP Assignment</div>
+            <div class="rq-doc-name">UK Responsible Person Assignment — SpiceHQ Exports</div>
+            <div class="rq-supplier">Supplier: SpiceHQ Exports, Kano &nbsp;·&nbsp; Submitted: 10 Jul 2025</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+            <span class="badge badge-amber">🟡 Pending Review</span>
+          </div>
+        </div>
+
+        <div class="rq-details">
+          <div class="rq-detail">Doc Type<strong>UKRP Assignment Letter</strong></div>
+          <div class="rq-detail">UKRP Company<strong>ComplianceFirst UK Ltd</strong></div>
+          <div class="rq-detail">UKRP Address<strong>Birmingham, B1 1BB</strong></div>
+          <div class="rq-detail">Products Covered<strong>Suya Spice, Kilishi, Yaji</strong></div>
+        </div>
+
+        <div class="rq-notes" style="margin-bottom:var(--space-md)">
+          UKRP letter appears correctly formatted. Verify that ComplianceFirst UK Ltd is active and registered on the OPSS UKRP database. Confirm signature date is within 12 months. Products listed in Schedule 1 match submitted product register.
+        </div>
+
+        <div class="rq-actions">
+          <button class="btn btn-primary btn-sm" onclick="approveDoc(this, 'UKRP Assignment — SpiceHQ')">✓ Approve</button>
+          <button class="btn btn-ghost btn-sm" style="border-color:var(--amber);color:var(--amber)" onclick="openRejectModal('changes')">✏️ Request Changes</button>
+          <button class="btn btn-ghost btn-sm" style="border-color:var(--red-alert);color:var(--red-alert)" onclick="openRejectModal('reject')">✕ Reject</button>
+          <a href="#" class="btn btn-ghost btn-sm">📄 View Document</a>
+          <a href="#" class="btn btn-ghost btn-sm">🔍 Check UKRP Register ↗</a>
+        </div>
+      </div>
+
+      <!-- PENDING: FSA Certificate -->
+      <div class="review-queue-item pending">
+        <div class="rq-header">
+          <div>
+            <div class="rq-doc-type">🛡️ FSA Certificate</div>
+            <div class="rq-doc-name">FSA Food Import Health Certificate — NaijaHerbs Ltd</div>
+            <div class="rq-supplier">Supplier: NaijaHerbs Ltd, Ogun &nbsp;·&nbsp; Submitted: 12 Jul 2025</div>
+          </div>
+          <div>
+            <span class="badge badge-amber">🟡 Pending Review</span>
+          </div>
+        </div>
+
+        <div class="rq-details">
+          <div class="rq-detail">Doc Type<strong>FSA Health Certificate</strong></div>
+          <div class="rq-detail">Product<strong>Hibiscus (Zobo) Dried Leaves</strong></div>
+          <div class="rq-detail">HS Code<strong>0813.40</strong></div>
+          <div class="rq-detail">Issuing Authority<strong>NAFDAC Nigeria</strong></div>
+        </div>
+
+        <div class="rq-notes" style="margin-bottom:var(--space-md)">
+          Certificate from NAFDAC needs cross-checking against FSA import alert list for dried flowers/herbs. Verify pesticide MRL compliance documentation is attached (Annex C). Check lot number traceability references match batch declaration.
+        </div>
+
+        <div class="rq-actions">
+          <button class="btn btn-primary btn-sm" onclick="approveDoc(this, 'FSA Certificate — NaijaHerbs')">✓ Approve</button>
+          <button class="btn btn-ghost btn-sm" style="border-color:var(--amber);color:var(--amber)" onclick="openRejectModal('changes')">✏️ Request Changes</button>
+          <button class="btn btn-ghost btn-sm" style="border-color:var(--red-alert);color:var(--red-alert)" onclick="openRejectModal('reject')">✕ Reject</button>
+          <a href="#" class="btn btn-ghost btn-sm">📄 View Document</a>
+        </div>
+      </div>
+
+      <!-- APPROVED (reference) -->
+      <div class="review-queue-item approved">
+        <div class="rq-header">
+          <div>
+            <div class="rq-doc-type">✅ UK Lab Test Report — Approved</div>
+            <div class="rq-doc-name">Cosmetic Safety Assessment — Raw Shea Butter (Grade A)</div>
+            <div class="rq-supplier">Supplier: AfroCare Naturals, Lagos &nbsp;·&nbsp; Approved by: Sarah A. · 15 Jun 2025</div>
+          </div>
+          <span class="badge badge-green">✓ Approved</span>
+        </div>
+
+        <div class="rq-details">
+          <div class="rq-detail">Lab Reference<strong>UKCAS-2025-06220</strong></div>
+          <div class="rq-detail">Testing Body<strong>Intertek UK Ltd</strong></div>
+          <div class="rq-detail">Valid Until<strong>15 Jun 2026</strong></div>
+          <div class="rq-detail">Approved By<strong>Sarah Adeyemi</strong></div>
+        </div>
+
+        <div class="rq-actions">
+          <a href="#" class="btn btn-ghost btn-sm">📄 View Document</a>
+          <button class="btn btn-ghost btn-sm" style="border-color:var(--amber);color:var(--amber)" onclick="openRejectModal('revoke')">⚠️ Revoke Approval</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- REJECT/CHANGES MODAL -->
+<div class="reject-modal-overlay" id="action-modal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="reject-modal">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-lg)">
+      <h2 id="modal-action-title" style="font-family:var(--font-display);font-size:1.2rem;font-weight:700;color:var(--green-deep)">Request Changes</h2>
+      <button onclick="document.getElementById('action-modal').classList.remove('open')" style="background:none;border:none;font-size:1.2rem;cursor:pointer;color:var(--muted)">✕</button>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Reason Code</label>
+      <select class="form-control">
+        <option>Select reason...</option>
+        <option>Document expired or invalid date</option>
+        <option>Missing annex / incomplete submission</option>
+        <option>Test results outside acceptable limits</option>
+        <option>UKRP not registered / inactive</option>
+        <option>Incorrect product formulation reference</option>
+        <option>Signature or certification missing</option>
+        <option>Other (specify below)</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Detailed Notes to Supplier</label>
+      <textarea class="form-control" rows="5" style="resize:vertical" placeholder="Explain specifically what needs to be corrected or resubmitted..."></textarea>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Deadline for Resubmission</label>
+      <input type="date" class="form-control" />
+    </div>
+
+    <div style="display:flex;gap:var(--space-sm);justify-content:flex-end;margin-top:var(--space-lg)">
+      <button onclick="document.getElementById('action-modal').classList.remove('open')" class="btn btn-ghost btn-sm">Cancel</button>
+      <button id="modal-action-btn" class="btn btn-primary btn-sm">Send to Supplier</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  function approveDoc(btn, name) {
+    if (confirm('Approve: ' + name + '?\n\nThis will activate the associated product listing.')) {
+      const card = btn.closest('.review-queue-item');
+      card.classList.remove('urgent', 'pending');
+      card.classList.add('approved');
+      card.querySelector('.rq-actions').innerHTML = '<span class="badge badge-green" style="font-size:0.82rem;padding:6px 14px">✓ Approved just now</span><a href="#" class="btn btn-ghost btn-sm">📄 View Document</a>';
+    }
+  }
+
+  function openRejectModal(type) {
+    const modal = document.getElementById('action-modal');
+    const title = document.getElementById('modal-action-title');
+    const btn = document.getElementById('modal-action-btn');
+    if (type === 'reject') {
+      title.textContent = 'Reject Document';
+      btn.textContent = 'Send Rejection';
+      btn.style.background = 'var(--red-alert)';
+    } else if (type === 'changes') {
+      title.textContent = 'Request Changes';
+      btn.textContent = 'Send to Supplier';
+      btn.style.background = '';
+    } else {
+      title.textContent = 'Revoke Approval';
+      btn.textContent = 'Revoke & Notify Supplier';
+      btn.style.background = 'var(--amber)';
+    }
+    modal.classList.add('open');
+  }
+</script>
+</body>
+</html>

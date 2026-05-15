@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Landed Cost Calculator — NaijaToUK</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../shared-styles.css" />
+  <style>
+    .calc-layout {
+      display: grid;
+      grid-template-columns: 400px 1fr;
+      gap: var(--space-xl);
+    }
+
+    .calc-inputs { }
+
+    .cost-breakdown { }
+
+    .cost-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--cream-dark);
+      font-size: 0.9rem;
+    }
+
+    .cost-row:last-child { border-bottom: none; }
+
+    .cost-row .cr-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--ink-mid);
+    }
+
+    .cost-row .cr-icon {
+      width: 28px; height: 28px;
+      border-radius: 6px;
+      background: var(--cream);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      flex-shrink: 0;
+    }
+
+    .cost-row .cr-value {
+      font-family: var(--font-mono);
+      font-weight: 600;
+      color: var(--ink);
+    }
+
+    .cost-row.subtotal {
+      background: var(--cream);
+      margin: 0 -16px;
+      padding: 10px 16px;
+      border-bottom: none;
+      border-radius: var(--radius-sm);
+    }
+
+    .cost-row.subtotal .cr-value { color: var(--green-mid); }
+
+    .cost-row.total {
+      background: var(--green-deep);
+      margin: var(--space-md) -16px -16px;
+      padding: 16px 16px;
+      border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+      border-bottom: none;
+    }
+
+    .cost-row.total .cr-label { color: var(--white); font-weight: 700; font-size: 1rem; }
+    .cost-row.total .cr-value { color: var(--gold-light); font-size: 1.15rem; font-weight: 700; }
+
+    .savings-banner {
+      background: linear-gradient(135deg, var(--green-deep), var(--green-mid));
+      border-radius: var(--radius-lg);
+      padding: var(--space-lg);
+      color: var(--white);
+      margin-bottom: var(--space-lg);
+    }
+
+    .savings-banner .sb-label {
+      font-size: 0.75rem;
+      font-family: var(--font-mono);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--green-light);
+      margin-bottom: 6px;
+    }
+
+    .savings-banner .sb-value {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--gold-light);
+      margin-bottom: 4px;
+    }
+
+    .savings-banner .sb-desc {
+      font-size: 0.82rem;
+      color: rgba(255,255,255,0.6);
+    }
+
+    .comparison-bar {
+      margin: var(--space-lg) 0;
+    }
+
+    .cbar-row {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      margin-bottom: var(--space-sm);
+      font-size: 0.82rem;
+    }
+
+    .cbar-label { width: 120px; color: var(--muted); flex-shrink: 0; }
+
+    .cbar-track {
+      flex: 1;
+      height: 24px;
+      border-radius: var(--radius-full);
+      overflow: hidden;
+      background: var(--cream);
+    }
+
+    .cbar-fill {
+      height: 100%;
+      border-radius: var(--radius-full);
+      display: flex;
+      align-items: center;
+      padding: 0 10px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: white;
+    }
+
+    .cbar-value { width: 80px; text-align: right; font-family: var(--font-mono); font-weight: 600; color: var(--ink-mid); }
+
+    .per-unit-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: var(--space-sm);
+      margin-top: var(--space-md);
+    }
+
+    .pu-card {
+      background: var(--cream);
+      border-radius: var(--radius-md);
+      padding: var(--space-md);
+      text-align: center;
+    }
+
+    .pu-label { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+    .pu-value { font-family: var(--font-display); font-size: 1.25rem; font-weight: 700; color: var(--green-deep); }
+    .pu-unit { font-size: 0.7rem; color: var(--muted); }
+
+    .slider-group {
+      margin-bottom: var(--space-md);
+    }
+
+    .slider-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--green-bright);
+    }
+
+    @media (max-width: 900px) {
+      .calc-layout { grid-template-columns: 1fr; }
+      .per-unit-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+  <nav class="sidebar">
+    <div class="sidebar-logo">
+      <a href="../external/index.html" style="font-family:var(--font-display);font-size:1.1rem;font-weight:700;color:white;text-decoration:none;display:flex;align-items:center;gap:8px;">
+        <span>🇳🇬→🇬🇧</span> NaijaToUK
+      </a>
+    </div>
+    <div class="sidebar-nav">
+      <div class="sidebar-section-label">Retailer Portal</div>
+      <a href="dashboard.html" class="sidebar-link"><span class="icon">📊</span> Dashboard</a>
+      <a href="catalogue.html" class="sidebar-link"><span class="icon">🛍️</span> Product Catalogue</a>
+      <a href="calculator.html" class="sidebar-link active"><span class="icon">🧮</span> Landed Cost Calculator</a>
+      <a href="aggregation.html" class="sidebar-link"><span class="icon">📦</span> Container Tracker</a>
+      <div class="sidebar-section-label">Account</div>
+      <a href="#" class="sidebar-link"><span class="icon">⚙️</span> Settings</a>
+      <a href="#" class="sidebar-link"><span class="icon">📄</span> My Documents</a>
+    </div>
+    <div class="sidebar-footer">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <div style="width:34px;height:34px;border-radius:50%;background:var(--green-mid);display:flex;align-items:center;justify-content:center;font-size:0.82rem;color:white;font-weight:700">JD</div>
+        <div><div style="font-size:0.82rem;color:white;font-weight:600">Jane Doe</div><div style="font-size:0.7rem;color:rgba(255,255,255,0.4)">UK Retailer</div></div>
+      </div>
+      <a href="../external/index.html" class="sidebar-link" style="font-size:0.8rem;padding:6px 16px"><span class="icon">↩️</span> Sign Out</a>
+    </div>
+  </nav>
+
+  <div class="main-content">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Landed Cost Calculator</div>
+        <div class="page-subtitle">Full cost breakdown per 100 kg batch — before you commit to an order</div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-ghost btn-sm" onclick="window.print()">📄 Export PDF</button>
+        <a href="catalogue.html" class="btn btn-primary btn-sm">Add to Order →</a>
+      </div>
+    </div>
+
+    <div class="page-body">
+      <div class="calc-layout">
+
+        <!-- INPUTS PANEL -->
+        <div>
+          <div class="card mb-md">
+            <div class="section-heading">Product Details</div>
+
+            <div class="form-group">
+              <label class="form-label">Product</label>
+              <select class="form-control" onchange="recalc()">
+                <option value="shea">Premium Shea Butter (Cosmetics)</option>
+                <option value="ankara">Ankara Wax Print Fabric (Textiles)</option>
+                <option value="zobo">Hibiscus (Zobo) Leaves (Food)</option>
+                <option value="soap">African Black Soap (Cosmetics)</option>
+                <option value="suya">Suya Spice Blend (Food)</option>
+              </select>
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-header">
+                <label class="form-label" style="margin-bottom:0">Batch Weight</label>
+                <span class="font-mono" style="font-size:0.82rem;font-weight:600;color:var(--green-deep)" id="weight-display">100 kg</span>
+              </div>
+              <input type="range" min="10" max="500" value="100" step="10" oninput="document.getElementById('weight-display').textContent=this.value+' kg';recalc()" />
+              <div style="display:flex;justify-content:space-between;font-size:0.7rem;color:var(--muted);margin-top:4px"><span>10 kg</span><span>500 kg</span></div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Product Cost per kg (£)</label>
+              <input type="number" class="form-control" value="6.40" step="0.10" id="product-price" oninput="recalc()" />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Currency</label>
+              <select class="form-control">
+                <option>GBP (£)</option>
+                <option>USD ($)</option>
+                <option>NGN (₦)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="card mb-md">
+            <div class="section-heading">Shipping Parameters</div>
+            <div class="form-group">
+              <label class="form-label">Origin City</label>
+              <select class="form-control">
+                <option>Lagos (Apapa Port)</option>
+                <option>Lagos (Tin Can Island)</option>
+                <option>Kano (via Lagos)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">UK Destination</label>
+              <select class="form-control">
+                <option>Tilbury Port → London</option>
+                <option>Tilbury Port → Birmingham</option>
+                <option>Tilbury Port → Manchester</option>
+                <option>Tilbury Port → Leeds</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Incoterm</label>
+              <select class="form-control">
+                <option>CIF (Cost, Insurance, Freight)</option>
+                <option>FOB (Free On Board)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="section-heading">Container Sharing</div>
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:var(--space-md)">
+              <label class="form-label" style="margin:0">Calculate as shared container</label>
+              <input type="checkbox" checked id="shared-toggle" onchange="recalc()" style="accent-color:var(--green-bright);width:16px;height:16px" />
+            </div>
+            <div class="slider-group">
+              <div class="slider-header">
+                <label class="form-label" style="margin-bottom:0">Your share %</label>
+                <span class="font-mono" style="font-size:0.82rem;font-weight:600;color:var(--green-deep)" id="share-display">35%</span>
+              </div>
+              <input type="range" min="5" max="100" value="35" step="5" oninput="document.getElementById('share-display').textContent=this.value+'%';recalc()" />
+            </div>
+            <div style="font-size:0.78rem;color:var(--muted)">Your freight share is calculated proportionally based on container volume allocation.</div>
+          </div>
+        </div>
+
+        <!-- RESULTS PANEL -->
+        <div>
+          <!-- SAVINGS BANNER -->
+          <div class="savings-banner mb-md">
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:var(--space-md)">
+              <div>
+                <div class="sb-label">Your Saving</div>
+                <div class="sb-value" id="res-saving">£2,340</div>
+                <div class="sb-desc">vs. solo container</div>
+              </div>
+              <div>
+                <div class="sb-label">Cost Reduction</div>
+                <div class="sb-value" id="res-reduction">38%</div>
+                <div class="sb-desc">on freight &amp; clearance</div>
+              </div>
+              <div>
+                <div class="sb-label">Annualised Saving</div>
+                <div class="sb-value" id="res-annual">£28k+</div>
+                <div class="sb-desc">at 4 shipments/year</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- COST BREAKDOWN CARD -->
+          <div class="card mb-md">
+            <div class="section-heading">Cost Breakdown — 100 kg batch</div>
+
+            <div style="font-size:0.78rem;color:var(--muted);margin-bottom:var(--space-md);font-family:var(--font-mono)">
+              All values in GBP (£) · Based on 35% container share · CIF terms
+            </div>
+
+            <div style="position:relative">
+              <!-- NIGERIA COSTS -->
+              <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin-bottom:var(--space-sm);font-family:var(--font-mono)">🇳🇬 Nigeria — Origin Costs</div>
+
+              <div class="cost-row">
+                <div class="cr-label"><div class="cr-icon">📦</div> Product Cost (100 kg)</div>
+                <div class="cr-value" id="c-product">£640.00</div>
+              </div>
+              <div class="cost-row">
+                <div class="cr-label"><div class="cr-icon">🚛</div> Nigeria Inland Logistics</div>
+                <div class="cr-value" id="c-inland">£48.00</div>
+              </div>
+              <div class="cost-row">
+                <div class="cr-label"><div class="cr-icon">📋</div> Export Documentation &amp; NAFDAC</div>
+                <div class="cr-value" id="c-docs">£55.00</div>
+              </div>
+
+              <div class="cost-row subtotal">
+                <div class="cr-label" style="font-weight:700;color:var(--green-deep)">Origin Sub-Total</div>
+                <div class="cr-value" id="c-origin-sub">£743.00</div>
+              </div>
+
+              <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin:var(--space-md) 0 var(--space-sm);font-family:var(--font-mono)">🚢 Freight — Shared Container</div>
+
+              <div class="cost-row">
+                <div class="cr-label"><div class="cr-icon">🚢</div> Ocean Freight (your 35% share)</div>
+                <div class="cr-value" id="c-freight">£280.00</div>
+              </div>
+              <div class="cost-row">
+                <div class="cr-label"><div class="cr-icon">🔒</div> Cargo Insurance</div>
+                <div class="cr-value" id="c-insurance">£42.00</div>
+              </div>
+              <div class="cost-row subtotal">
+                <div class="cr-label" style="font-weight:700;color:var(--green-deep)">CIF Value</div>
+                <div class="cr-value" id="c-cif">£1,065.00</div>
+              </div>
+
+              <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin:var(--space-md) 0 var(--space-sm);font-family:var(--font-mono)">🇬🇧 UK — Import & Delivery Costs</div>
+
+              <div class="cost-row">
+                <div class="cr-label">
+                  <div class="cr-icon">💷</div> Import VAT (20% of CIF)
+                  <span class="badge badge-green" style="font-size:0.62rem;margin-left:4px">0% Duty (DCTS)</span>
+                </div>
+                <div class="cr-value" id="c-vat">£213.00</div>
+              </div>
+              <div class="cost-row">
+                <div class="cr-label"><div class="cr-icon">⚓</div> Port Handling &amp; Clearance</div>
+                <div class="cr-value" id="c-port">£95.00</div>
+              </div>
+              <div class="cost-row">
+                <div class="cr-label"><div class="cr-icon">🚚</div> UK Inland Delivery (per 100 kg)</div>
+                <div class="cr-value" id="c-delivery">£64.00</div>
+              </div>
+
+              <div class="cost-row total">
+                <div class="cr-label">Total Landed Cost (100 kg)</div>
+                <div class="cr-value" id="c-total">£1,437.00</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- COMPARISON BARS -->
+          <div class="card mb-md">
+            <div class="section-heading">Savings vs. Solo Shipment</div>
+            <div class="comparison-bar">
+              <div class="cbar-row">
+                <div class="cbar-label">Solo container</div>
+                <div class="cbar-track">
+                  <div class="cbar-fill" style="background:var(--red-alert);width:100%">£2,357</div>
+                </div>
+                <div class="cbar-value">£2,357</div>
+              </div>
+              <div class="cbar-row">
+                <div class="cbar-label">Shared (you)</div>
+                <div class="cbar-track">
+                  <div class="cbar-fill" id="savings-bar" style="background:var(--green-bright);width:61%">£1,437</div>
+                </div>
+                <div class="cbar-value" id="savings-bar-val">£1,437</div>
+              </div>
+            </div>
+            <div style="background:rgba(34,168,107,0.08);border:1px solid rgba(34,168,107,0.2);border-radius:var(--radius-md);padding:12px var(--space-md);font-size:0.85rem;color:var(--green-mid)">
+              💡 <strong>You save £920 per 100 kg batch</strong> by sharing container space. At 4 batches/year = <strong>£3,680 annual saving</strong> on this product alone.
+            </div>
+          </div>
+
+          <!-- PER UNIT COSTS -->
+          <div class="card">
+            <div class="section-heading">Per Unit Cost Analysis</div>
+            <div class="per-unit-grid">
+              <div class="pu-card">
+                <div class="pu-label">Cost per kg</div>
+                <div class="pu-value">£14.37</div>
+                <div class="pu-unit">fully landed</div>
+              </div>
+              <div class="pu-card">
+                <div class="pu-label">Suggested Retail</div>
+                <div class="pu-value">£22–28</div>
+                <div class="pu-unit">per kg (est.)</div>
+              </div>
+              <div class="pu-card" style="background:rgba(34,168,107,0.06);border:1px solid rgba(34,168,107,0.15)">
+                <div class="pu-label" style="color:var(--green-mid)">Gross Margin</div>
+                <div class="pu-value" style="color:var(--green-mid)">35–49%</div>
+                <div class="pu-unit">estimated range</div>
+              </div>
+            </div>
+
+            <div style="margin-top:var(--space-lg);display:flex;gap:var(--space-sm)">
+              <a href="catalogue.html" class="btn btn-primary">+ Add to Order</a>
+              <button class="btn btn-ghost" onclick="window.print()">📄 Export PDF</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const rates = {
+    shea: { price: 6.40, inland: 48, docs: 55 },
+    ankara: { price: 14.00, inland: 62, docs: 45 },
+    zobo: { price: 3.80, inland: 38, docs: 40 },
+    soap: { price: 4.20, inland: 48, docs: 55 },
+    suya: { price: 9.50, inland: 38, docs: 40 },
+  };
+
+  function recalc() {
+    const select = document.querySelector('select');
+    const product = (select.value || 'shea');
+    const r = rates[product] || rates.shea;
+    const weight = parseInt(document.querySelector('input[type="range"]').value) || 100;
+    const pricePerKg = parseFloat(document.getElementById('product-price').value) || r.price;
+    const shareInput = document.querySelectorAll('input[type="range"]')[1];
+    const share = (parseInt(shareInput?.value) || 35) / 100;
+    const isShared = document.getElementById('shared-toggle').checked;
+
+    const product_cost = pricePerKg * weight;
+    const inland = (r.inland / 100) * weight;
+    const docs = r.docs;
+    const origin_sub = product_cost + inland + docs;
+    const solo_freight = 800;
+    const freight = isShared ? solo_freight * share : solo_freight;
+    const insurance = (origin_sub + freight) * 0.04;
+    const cif = origin_sub + freight + insurance;
+    const vat = cif * 0.20;
+    const port = 95;
+    const delivery = 0.64 * weight;
+    const total = cif + vat + port + delivery;
+    const solo_total = product_cost + inland + docs + solo_freight + (origin_sub + solo_freight) * 0.04 + ((product_cost + inland + docs + solo_freight) * 1.04 * 0.2) + port + delivery;
+    const saving = solo_total - total;
+
+    const fmt = v => '£' + v.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+
+    document.getElementById('c-product').textContent = fmt(product_cost);
+    document.getElementById('c-inland').textContent = fmt(inland);
+    document.getElementById('c-docs').textContent = fmt(docs);
+    document.getElementById('c-origin-sub').textContent = fmt(origin_sub);
+    document.getElementById('c-freight').textContent = fmt(freight);
+    document.getElementById('c-insurance').textContent = fmt(insurance);
+    document.getElementById('c-cif').textContent = fmt(cif);
+    document.getElementById('c-vat').textContent = fmt(vat);
+    document.getElementById('c-port').textContent = fmt(port);
+    document.getElementById('c-delivery').textContent = fmt(delivery);
+    document.getElementById('c-total').textContent = fmt(total);
+    document.getElementById('res-saving').textContent = fmt(saving);
+    document.getElementById('res-reduction').textContent = Math.round((saving / solo_total) * 100) + '%';
+    document.getElementById('res-annual').textContent = '£' + Math.round(saving * 4 / 1000) + 'k+';
+    const pct = Math.round((total / solo_total) * 100);
+    document.getElementById('savings-bar').style.width = pct + '%';
+    document.getElementById('savings-bar').textContent = fmt(total);
+    document.getElementById('savings-bar-val').textContent = fmt(total);
+  }
+</script>
+</body>
+</html>

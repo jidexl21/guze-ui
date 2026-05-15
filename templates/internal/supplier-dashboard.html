@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Supplier Portal — NaijaToUK</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../shared-styles.css" />
+  <style>
+    .supplier-sidebar { background: #1A1A2E; }
+    .supplier-sidebar .sidebar-link.active { border-left-color: var(--gold); }
+    .supplier-sidebar .sidebar-link:hover { border-left-color: var(--gold-light); }
+    .supplier-sidebar .sidebar-section-label { color: rgba(255,255,255,0.3); }
+
+    .payout-card {
+      background: linear-gradient(135deg, #1A1A2E, #16213E);
+      border-radius: var(--radius-lg);
+      padding: var(--space-xl);
+      color: var(--white);
+      margin-bottom: var(--space-lg);
+    }
+
+    .payout-label {
+      font-size: 0.72rem;
+      font-family: var(--font-mono);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: rgba(255,255,255,0.45);
+      margin-bottom: 8px;
+    }
+
+    .payout-amount {
+      font-family: var(--font-display);
+      font-size: 3rem;
+      font-weight: 700;
+      color: var(--gold-light);
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+
+    .payout-meta {
+      font-size: 0.82rem;
+      color: rgba(255,255,255,0.5);
+    }
+
+    .product-mgmt-card {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--cream-dark);
+      overflow: hidden;
+    }
+
+    .product-mgmt-header {
+      padding: var(--space-md) var(--space-lg);
+      border-bottom: 1px solid var(--cream-dark);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .doc-status-card {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--cream-dark);
+      padding: var(--space-lg);
+    }
+
+    .doc-item {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      padding: 12px 0;
+      border-bottom: 1px solid var(--cream-dark);
+    }
+
+    .doc-item:last-child { border-bottom: none; }
+
+    .doc-icon {
+      width: 36px; height: 36px;
+      border-radius: var(--radius-sm);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+
+    .doc-icon.approved { background: rgba(34,168,107,0.12); }
+    .doc-icon.pending { background: rgba(230,126,34,0.12); }
+    .doc-icon.missing { background: rgba(192,57,43,0.1); }
+
+    .doc-name { flex: 1; font-size: 0.88rem; color: var(--ink-mid); font-weight: 500; }
+    .doc-sub { font-size: 0.75rem; color: var(--muted); }
+
+    .order-queue-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-md);
+      padding: var(--space-md);
+      border-bottom: 1px solid var(--cream-dark);
+      font-size: 0.85rem;
+    }
+
+    .order-queue-item:last-child { border-bottom: none; }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+  <!-- SUPPLIER SIDEBAR (dark navy theme) -->
+  <nav class="sidebar supplier-sidebar">
+    <div class="sidebar-logo" style="border-bottom-color:rgba(255,255,255,0.06)">
+      <a href="../external/index.html" style="font-family:var(--font-display);font-size:1.1rem;font-weight:700;color:white;text-decoration:none;display:flex;align-items:center;gap:8px;">
+        <span>🏭</span> Supplier Portal
+      </a>
+    </div>
+    <div class="sidebar-nav">
+      <div class="sidebar-section-label">Management</div>
+      <a href="supplier-dashboard.html" class="sidebar-link active"><span class="icon">📊</span> Dashboard</a>
+      <a href="#" class="sidebar-link"><span class="icon">📦</span> My Products</a>
+      <a href="#" class="sidebar-link"><span class="icon">🛒</span> Orders</a>
+      <a href="#" class="sidebar-link"><span class="icon">💰</span> Payouts</a>
+      <div class="sidebar-section-label">Compliance</div>
+      <a href="#" class="sidebar-link"><span class="icon">📄</span> My Documents</a>
+      <a href="#" class="sidebar-link"><span class="icon">🧪</span> Lab Reports</a>
+      <a href="#" class="sidebar-link"><span class="icon">⚖️</span> UKRP Assignment</a>
+      <div class="sidebar-section-label">Support</div>
+      <a href="#" class="sidebar-link"><span class="icon">💬</span> Help Centre</a>
+      <a href="#" class="sidebar-link"><span class="icon">⚙️</span> Settings</a>
+    </div>
+    <div class="sidebar-footer" style="border-top-color:rgba(255,255,255,0.06)">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <div style="width:34px;height:34px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-size:0.82rem;color:var(--ink);font-weight:700">AO</div>
+        <div><div style="font-size:0.82rem;color:white;font-weight:600">AfroCare Naturals</div><div style="font-size:0.7rem;color:rgba(255,255,255,0.35)">Supplier · Lagos</div></div>
+      </div>
+      <a href="../external/index.html" class="sidebar-link" style="font-size:0.8rem;padding:6px 16px"><span class="icon">↩️</span> Sign Out</a>
+    </div>
+  </nav>
+
+  <div class="main-content">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Supplier Dashboard</div>
+        <div class="page-subtitle">AfroCare Naturals — Lagos, Nigeria · Verified Supplier</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span class="compliance-badge opss">⚖️ OPSS Registered</span>
+        <button class="btn btn-primary btn-sm">+ Add Product</button>
+      </div>
+    </div>
+
+    <div class="page-body">
+
+      <!-- KPI ROW -->
+      <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:var(--space-lg)">
+        <div class="stat-card">
+          <div class="stat-label">Total Earnings (YTD)</div>
+          <div class="stat-value">₦4.2M</div>
+          <div class="stat-change">↑ £8,640 GBP equivalent</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Pending Payout</div>
+          <div class="stat-value">£1,240</div>
+          <div class="stat-sub">Next batch: 22 Jul</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Active Listings</div>
+          <div class="stat-value">8</div>
+          <div class="stat-sub">3 pending compliance review</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Open Orders</div>
+          <div class="stat-value">5</div>
+          <div class="stat-sub">2 ready to ship</div>
+        </div>
+      </div>
+
+      <!-- PAYOUT + DOCS ROW -->
+      <div class="grid-2 mb-lg">
+
+        <!-- PAYOUT CARD -->
+        <div>
+          <div class="payout-card">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start">
+              <div>
+                <div class="payout-label">Next Scheduled Payout</div>
+                <div class="payout-amount">£1,240</div>
+                <div class="payout-meta">Batch NGU-031 · Due 22 Jul 2025 · 5 orders</div>
+              </div>
+              <div style="text-align:right">
+                <div style="font-size:0.7rem;color:rgba(255,255,255,0.35);font-family:var(--font-mono);text-transform:uppercase;margin-bottom:4px">Payout Method</div>
+                <div style="font-size:0.82rem;color:var(--gold-light)">🏦 GTBank **** 4421</div>
+              </div>
+            </div>
+            <div style="margin-top:var(--space-lg);padding-top:var(--space-md);border-top:1px solid rgba(255,255,255,0.08)">
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:var(--space-md)">
+                <div>
+                  <div style="font-size:0.68rem;color:rgba(255,255,255,0.35);font-family:var(--font-mono);text-transform:uppercase;margin-bottom:4px">Gross Sales</div>
+                  <div style="font-size:0.95rem;font-weight:600;color:white">£1,440</div>
+                </div>
+                <div>
+                  <div style="font-size:0.68rem;color:rgba(255,255,255,0.35);font-family:var(--font-mono);text-transform:uppercase;margin-bottom:4px">Platform Fee</div>
+                  <div style="font-size:0.95rem;font-weight:600;color:rgba(255,100,100,0.8)">−£200</div>
+                </div>
+                <div>
+                  <div style="font-size:0.68rem;color:rgba(255,255,255,0.35);font-family:var(--font-mono);text-transform:uppercase;margin-bottom:4px">Net Payout</div>
+                  <div style="font-size:0.95rem;font-weight:600;color:var(--gold-light)">£1,240</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- PAYOUT HISTORY -->
+          <div class="card">
+            <div class="section-heading">Payout History</div>
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Batch</th>
+                  <th>Date</th>
+                  <th>Amount</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="font-mono" style="font-size:0.8rem">NGU-028</span></td>
+                  <td>02 Jun 2025</td>
+                  <td style="font-weight:600;color:var(--green-deep)">£980</td>
+                  <td><span class="badge badge-green">✓ Paid</span></td>
+                </tr>
+                <tr>
+                  <td><span class="font-mono" style="font-size:0.8rem">NGU-026</span></td>
+                  <td>14 May 2025</td>
+                  <td style="font-weight:600;color:var(--green-deep)">£1,420</td>
+                  <td><span class="badge badge-green">✓ Paid</span></td>
+                </tr>
+                <tr>
+                  <td><span class="font-mono" style="font-size:0.8rem">NGU-024</span></td>
+                  <td>28 Apr 2025</td>
+                  <td style="font-weight:600;color:var(--green-deep)">£640</td>
+                  <td><span class="badge badge-green">✓ Paid</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- COMPLIANCE DOCUMENTS -->
+        <div class="doc-status-card">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-md)">
+            <div class="section-heading" style="margin-bottom:0">Compliance Documents</div>
+            <a href="admin-compliance.html" class="btn btn-ghost btn-sm">View All →</a>
+          </div>
+
+          <div style="background:rgba(230,126,34,0.08);border:1px solid rgba(230,126,34,0.2);border-radius:var(--radius-sm);padding:10px 14px;font-size:0.8rem;color:var(--amber);margin-bottom:var(--space-md)">
+            ⚠️ 2 documents require action before new products can be listed.
+          </div>
+
+          <div class="doc-item">
+            <div class="doc-icon approved">✅</div>
+            <div>
+              <div class="doc-name">UK Lab Test Report — Shea Butter</div>
+              <div class="doc-sub">Approved 15 Jun 2025 · Expires 15 Jun 2026</div>
+            </div>
+            <span class="badge badge-green">Approved</span>
+          </div>
+          <div class="doc-item">
+            <div class="doc-icon approved">✅</div>
+            <div>
+              <div class="doc-name">UKRP Assignment Certificate</div>
+              <div class="doc-sub">UK Responsible Person: SafeImports Ltd, London</div>
+            </div>
+            <span class="badge badge-green">Active</span>
+          </div>
+          <div class="doc-item">
+            <div class="doc-icon approved">✅</div>
+            <div>
+              <div class="doc-name">OPSS Registration — Cosmetics</div>
+              <div class="doc-sub">Registration ID: OPSS-2025-NG-00441</div>
+            </div>
+            <span class="badge badge-green">Approved</span>
+          </div>
+          <div class="doc-item">
+            <div class="doc-icon pending">⏳</div>
+            <div>
+              <div class="doc-name">UK Lab Test Report — Black Soap</div>
+              <div class="doc-sub">Submitted 10 Jul 2025 · Under review</div>
+            </div>
+            <span class="badge badge-amber">Pending</span>
+          </div>
+          <div class="doc-item">
+            <div class="doc-icon missing">❌</div>
+            <div>
+              <div class="doc-name">FSA Hygiene Certificate — 2025</div>
+              <div class="doc-sub">Required for food-adjacent products · Not uploaded</div>
+            </div>
+            <div style="display:flex;gap:6px">
+              <span class="badge badge-red">Missing</span>
+              <button class="btn btn-primary btn-sm">Upload</button>
+            </div>
+          </div>
+          <div class="doc-item">
+            <div class="doc-icon pending">⏳</div>
+            <div>
+              <div class="doc-name">Certificate of Origin (DCTS)</div>
+              <div class="doc-sub">For Batch NGU-032 · Awaiting customs sign-off</div>
+            </div>
+            <span class="badge badge-amber">Pending</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- PRODUCTS + ORDERS -->
+      <div class="grid-2">
+
+        <!-- MY PRODUCTS -->
+        <div class="product-mgmt-card">
+          <div class="product-mgmt-header">
+            <div class="section-heading" style="margin-bottom:0">My Product Listings</div>
+            <button class="btn btn-primary btn-sm">+ Add Product</button>
+          </div>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Category</th>
+                <th>Price/kg</th>
+                <th>Status</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="font-weight:600;color:var(--green-deep)">Shea Butter (Raw)</td>
+                <td><span class="badge badge-green">Cosmetics</span></td>
+                <td class="font-mono" style="font-size:0.82rem">£6.40</td>
+                <td><span class="badge badge-green">● Live</span></td>
+                <td><button class="btn btn-ghost btn-sm">Edit</button></td>
+              </tr>
+              <tr>
+                <td style="font-weight:600;color:var(--green-deep)">African Black Soap</td>
+                <td><span class="badge badge-green">Cosmetics</span></td>
+                <td class="font-mono" style="font-size:0.82rem">£4.20</td>
+                <td><span class="badge badge-amber">● Pending</span></td>
+                <td><button class="btn btn-ghost btn-sm">Edit</button></td>
+              </tr>
+              <tr>
+                <td style="font-weight:600;color:var(--green-deep)">Moringa Powder</td>
+                <td><span class="badge badge-gold">Food</span></td>
+                <td class="font-mono" style="font-size:0.82rem">£8.00</td>
+                <td><span class="badge badge-green">● Live</span></td>
+                <td><button class="btn btn-ghost btn-sm">Edit</button></td>
+              </tr>
+              <tr>
+                <td style="font-weight:600;color:var(--green-deep)">Shea Butter (Whipped)</td>
+                <td><span class="badge badge-green">Cosmetics</span></td>
+                <td class="font-mono" style="font-size:0.82rem">£9.80</td>
+                <td><span class="badge badge-red">● Blocked</span></td>
+                <td><button class="btn btn-ghost btn-sm">Edit</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- OPEN ORDERS -->
+        <div class="card">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-md)">
+            <div class="section-heading" style="margin-bottom:0">Open Orders</div>
+            <span class="badge badge-amber">5 pending</span>
+          </div>
+
+          <div class="order-queue-item">
+            <div>
+              <div style="font-weight:600;color:var(--green-deep);font-size:0.88rem">Shea Butter 50 kg</div>
+              <div style="font-size:0.75rem;color:var(--muted)">Retailer: Jane Doe · Batch NGU-031</div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-weight:700;color:var(--green-deep)">£320</div>
+              <span class="badge badge-green">Ready to Ship</span>
+            </div>
+          </div>
+
+          <div class="order-queue-item">
+            <div>
+              <div style="font-weight:600;color:var(--green-deep);font-size:0.88rem">Moringa Powder 30 kg</div>
+              <div style="font-size:0.75rem;color:var(--muted)">Retailer: FreshNaijaUK · Batch NGU-031</div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-weight:700;color:var(--green-deep)">£240</div>
+              <span class="badge badge-amber">Packing</span>
+            </div>
+          </div>
+
+          <div class="order-queue-item">
+            <div>
+              <div style="font-weight:600;color:var(--green-deep);font-size:0.88rem">Shea Butter 20 kg</div>
+              <div style="font-size:0.75rem;color:var(--muted)">Retailer: NaturalUKShop · Batch NGU-032</div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-weight:700;color:var(--green-deep)">£128</div>
+              <span class="badge badge-blue">New</span>
+            </div>
+          </div>
+
+          <div style="margin-top:var(--space-md)">
+            <button class="btn btn-outline btn-sm" style="width:100%">View All Orders →</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

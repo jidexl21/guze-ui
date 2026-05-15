@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Container Tracker — NaijaToUK</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../shared-styles.css" />
+  <style>
+    .agg-header-bar {
+      background: var(--green-deep);
+      border-radius: var(--radius-lg);
+      padding: var(--space-lg) var(--space-xl);
+      color: var(--white);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--space-lg);
+      flex-wrap: wrap;
+      gap: var(--space-md);
+    }
+
+    .agg-batch-id {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--green-light);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 4px;
+    }
+
+    .agg-batch-title {
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      font-weight: 700;
+    }
+
+    .agg-batch-meta {
+      font-size: 0.82rem;
+      color: rgba(255,255,255,0.55);
+      margin-top: 4px;
+    }
+
+    .agg-stat {
+      text-align: center;
+    }
+
+    .agg-stat-val {
+      font-family: var(--font-display);
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--gold-light);
+    }
+
+    .agg-stat-lbl {
+      font-size: 0.72rem;
+      color: rgba(255,255,255,0.45);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      font-family: var(--font-mono);
+    }
+
+    /* HORIZONTAL BAR VIZ */
+    .viz-section {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--cream-dark);
+      padding: var(--space-lg);
+      margin-bottom: var(--space-lg);
+    }
+
+    .viz-title {
+      font-size: 0.78rem;
+      font-family: var(--font-mono);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: var(--space-md);
+    }
+
+    .container-bar-full {
+      height: 64px;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      display: flex;
+      background: var(--cream);
+      border: 2px solid var(--cream-dark);
+      margin-bottom: var(--space-md);
+      position: relative;
+    }
+
+    .bar-segment {
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      font-size: 0.72rem;
+      font-weight: 700;
+      font-family: var(--font-mono);
+      color: rgba(0,0,0,0.65);
+      transition: all 0.4s ease;
+      position: relative;
+    }
+
+    .bar-segment:hover { filter: brightness(1.08); }
+
+    .bar-segment .seg-name { font-size: 0.68rem; }
+    .bar-segment .seg-pct { font-size: 0.82rem; font-weight: 700; }
+
+    .bar-threshold-line {
+      position: absolute;
+      top: 0; bottom: 0;
+      width: 3px;
+      background: rgba(0,0,0,0.25);
+      left: 85%;
+      z-index: 10;
+    }
+
+    .bar-threshold-label {
+      position: absolute;
+      top: -22px;
+      left: 85%;
+      transform: translateX(-50%);
+      font-size: 0.68rem;
+      font-family: var(--font-mono);
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .bar-wrapper { position: relative; margin-top: 24px; }
+
+    .seg-yours { background: #22A86B; }
+    .seg-2 { background: #D4A437; }
+    .seg-3 { background: #4ECDC4; }
+    .seg-4 { background: #FF6B6B; }
+    .seg-available { background: repeating-linear-gradient(45deg, #f0ece4, #f0ece4 4px, #e6e0d5 4px, #e6e0d5 8px); }
+
+    /* LEGEND */
+    .seg-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-md);
+      margin-top: var(--space-md);
+    }
+
+    .legend-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.82rem;
+      color: var(--ink-mid);
+    }
+
+    .legend-pill .lp-color {
+      width: 14px; height: 14px;
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+
+    .legend-pill .lp-pct {
+      font-family: var(--font-mono);
+      font-weight: 600;
+      color: var(--green-deep);
+    }
+
+    /* PIE CHART (CSS-only) */
+    .pie-wrapper {
+      display: flex;
+      align-items: center;
+      gap: var(--space-xl);
+      flex-wrap: wrap;
+    }
+
+    .pie-container {
+      position: relative;
+      width: 220px;
+      height: 220px;
+      flex-shrink: 0;
+    }
+
+    .pie-chart {
+      width: 220px;
+      height: 220px;
+      border-radius: 50%;
+      background: conic-gradient(
+        #22A86B 0deg 126deg,
+        #D4A437 126deg 216deg,
+        #4ECDC4 216deg 280.8deg,
+        #FF6B6B 280.8deg 316.8deg,
+        #e8e2d8 316.8deg 360deg
+      );
+      transition: transform 0.3s ease;
+    }
+
+    .pie-chart:hover { transform: scale(1.03); }
+
+    .pie-center {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 90px; height: 90px;
+      background: var(--white);
+      border-radius: 50%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+    }
+
+    .pie-center-pct {
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--green-deep);
+      line-height: 1;
+    }
+
+    .pie-center-label {
+      font-size: 0.6rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .pie-legend {
+      flex: 1;
+      min-width: 200px;
+    }
+
+    .pie-legend-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      padding: 10px;
+      border-radius: var(--radius-md);
+      transition: background var(--transition);
+    }
+
+    .pie-legend-item:hover { background: var(--cream); }
+
+    .pie-legend-item.yours { background: rgba(34,168,107,0.06); border: 1px solid rgba(34,168,107,0.15); }
+
+    .pie-legend-color {
+      width: 12px; height: 12px;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+
+    .pie-legend-name { flex: 1; font-size: 0.85rem; color: var(--ink-mid); }
+    .pie-legend-pct { font-family: var(--font-mono); font-size: 0.82rem; font-weight: 600; color: var(--green-deep); }
+
+    /* SAVINGS TABLE */
+    .savings-compare {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: var(--space-md);
+      margin-bottom: var(--space-lg);
+    }
+
+    .sc-card {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--cream-dark);
+      padding: var(--space-lg);
+    }
+
+    .sc-card.highlight {
+      border-color: var(--green-bright);
+      background: rgba(34,168,107,0.04);
+    }
+
+    .sc-label {
+      font-size: 0.72rem;
+      font-family: var(--font-mono);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .sc-value {
+      font-family: var(--font-display);
+      font-size: 1.8rem;
+      font-weight: 700;
+      line-height: 1.1;
+      margin-bottom: 4px;
+    }
+
+    .sc-sub { font-size: 0.78rem; color: var(--muted); }
+
+    /* BATCH SELECTOR */
+    .batch-tabs {
+      display: flex;
+      gap: var(--space-sm);
+      margin-bottom: var(--space-lg);
+      flex-wrap: wrap;
+    }
+
+    .batch-tab {
+      padding: 8px 18px;
+      border-radius: var(--radius-full);
+      border: 1.5px solid var(--cream-dark);
+      background: var(--white);
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition);
+      color: var(--muted);
+    }
+
+    .batch-tab.active {
+      border-color: var(--green-deep);
+      color: var(--green-deep);
+      background: rgba(10,56,40,0.05);
+    }
+
+    @media (max-width: 900px) {
+      .savings-compare { grid-template-columns: 1fr 1fr; }
+      .pie-wrapper { flex-direction: column; }
+    }
+    @media (max-width: 600px) {
+      .savings-compare { grid-template-columns: 1fr; }
+      .agg-header-bar { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+  <nav class="sidebar">
+    <div class="sidebar-logo">
+      <a href="../external/index.html" style="font-family:var(--font-display);font-size:1.1rem;font-weight:700;color:white;text-decoration:none;display:flex;align-items:center;gap:8px;">
+        <span>🇳🇬→🇬🇧</span> NaijaToUK
+      </a>
+    </div>
+    <div class="sidebar-nav">
+      <div class="sidebar-section-label">Retailer Portal</div>
+      <a href="dashboard.html" class="sidebar-link"><span class="icon">📊</span> Dashboard</a>
+      <a href="catalogue.html" class="sidebar-link"><span class="icon">🛍️</span> Product Catalogue</a>
+      <a href="calculator.html" class="sidebar-link"><span class="icon">🧮</span> Landed Cost Calculator</a>
+      <a href="aggregation.html" class="sidebar-link active"><span class="icon">📦</span> Container Tracker</a>
+      <div class="sidebar-section-label">Account</div>
+      <a href="#" class="sidebar-link"><span class="icon">⚙️</span> Settings</a>
+      <a href="#" class="sidebar-link"><span class="icon">📄</span> My Documents</a>
+    </div>
+    <div class="sidebar-footer">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <div style="width:34px;height:34px;border-radius:50%;background:var(--green-mid);display:flex;align-items:center;justify-content:center;font-size:0.82rem;color:white;font-weight:700">JD</div>
+        <div><div style="font-size:0.82rem;color:white;font-weight:600">Jane Doe</div><div style="font-size:0.7rem;color:rgba(255,255,255,0.4)">UK Retailer</div></div>
+      </div>
+      <a href="../external/index.html" class="sidebar-link" style="font-size:0.8rem;padding:6px 16px"><span class="icon">↩️</span> Sign Out</a>
+    </div>
+  </nav>
+
+  <div class="main-content">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Aggregation & Container Tracker</div>
+        <div class="page-subtitle">Live container fill visualisation — Lagos to Tilbury</div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <span class="badge badge-green">● Live Tracking</span>
+        <a href="catalogue.html" class="btn btn-primary btn-sm">+ Add to Batch</a>
+      </div>
+    </div>
+
+    <div class="page-body">
+
+      <!-- BATCH SELECTOR -->
+      <div class="batch-tabs">
+        <button class="batch-tab active">NGU-031 · In Transit</button>
+        <button class="batch-tab">NGU-032 · Packing</button>
+        <button class="batch-tab">NGU-030 · UK Clearance</button>
+      </div>
+
+      <!-- BATCH HEADER -->
+      <div class="agg-header-bar">
+        <div>
+          <div class="agg-batch-id">Batch #NGU-031 · 40ft Standard Container</div>
+          <div class="agg-batch-title">Lagos (Apapa) → Tilbury Port, UK</div>
+          <div class="agg-batch-meta">🚢 Departed: 08 Jul 2025 &nbsp;·&nbsp; ETA: 22 Jul 2025 &nbsp;·&nbsp; 4 co-shippers &nbsp;·&nbsp; Status: In Transit</div>
+        </div>
+        <div style="display:flex;gap:var(--space-xl)">
+          <div class="agg-stat">
+            <div class="agg-stat-val">83%</div>
+            <div class="agg-stat-lbl">Fill Rate</div>
+          </div>
+          <div class="agg-stat">
+            <div class="agg-stat-val">33.2 m³</div>
+            <div class="agg-stat-lbl">Used / 40 m³</div>
+          </div>
+          <div class="agg-stat">
+            <div class="agg-stat-val">14 days</div>
+            <div class="agg-stat-lbl">ETA</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- HORIZONTAL BAR VIZ -->
+      <div class="viz-section">
+        <div class="viz-title">📦 Container Fill — Horizontal View</div>
+        <div style="background:rgba(34,168,107,0.06);border:1px solid rgba(34,168,107,0.15);border-radius:var(--radius-sm);padding:10px 14px;font-size:0.8rem;color:var(--green-mid);margin-bottom:var(--space-md);display:flex;align-items:center;gap:8px">
+          <span style="font-size:1rem">ℹ️</span>
+          Container is considered <strong>full at 85%</strong> of total capacity (40 m³). Current fill: <strong>83%</strong> — space available for additional consignments.
+        </div>
+
+        <div class="bar-wrapper">
+          <div class="bar-threshold-label">85% full threshold</div>
+          <div class="container-bar-full">
+            <div class="bar-threshold-line"></div>
+            <div class="bar-segment seg-yours" style="width:35%">
+              <div class="seg-name">Jane Doe (You)</div>
+              <div class="seg-pct">35%</div>
+            </div>
+            <div class="bar-segment seg-2" style="width:25%">
+              <div class="seg-name">FabricNG</div>
+              <div class="seg-pct">25%</div>
+            </div>
+            <div class="bar-segment seg-3" style="width:18%">
+              <div class="seg-name">SpiceHQ</div>
+              <div class="seg-pct">18%</div>
+            </div>
+            <div class="bar-segment seg-4" style="width:5%">
+              <div class="seg-pct">5%</div>
+            </div>
+            <div class="bar-segment seg-available" style="width:17%;display:flex;align-items:center;justify-content:center;font-size:0.68rem;color:var(--muted)">
+              17% avail.
+            </div>
+          </div>
+        </div>
+
+        <div class="seg-legend">
+          <div class="legend-pill">
+            <div class="lp-color" style="background:#22A86B"></div>
+            <span><strong>Jane Doe (You)</strong></span>
+            <span class="lp-pct">35% · 14.0 m³</span>
+            <span class="badge badge-green" style="font-size:0.62rem">Your share</span>
+          </div>
+          <div class="legend-pill">
+            <div class="lp-color" style="background:#D4A437"></div>
+            <span>FabricNG Ltd</span>
+            <span class="lp-pct">25% · 10.0 m³</span>
+          </div>
+          <div class="legend-pill">
+            <div class="lp-color" style="background:#4ECDC4"></div>
+            <span>SpiceHQ Exports</span>
+            <span class="lp-pct">18% · 7.2 m³</span>
+          </div>
+          <div class="legend-pill">
+            <div class="lp-color" style="background:#FF6B6B"></div>
+            <span>Crafts+ NG</span>
+            <span class="lp-pct">5% · 2.0 m³</span>
+          </div>
+          <div class="legend-pill">
+            <div class="lp-color" style="background:#e8e2d8;border:1px dashed #ccc"></div>
+            <span>Available Space</span>
+            <span class="lp-pct">17% · 6.8 m³</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- PIE CHART VIZ -->
+      <div class="viz-section">
+        <div class="viz-title">🥧 Container Fill — Pie Chart View</div>
+        <div class="pie-wrapper">
+          <div class="pie-container">
+            <div class="pie-chart"></div>
+            <div class="pie-center">
+              <div class="pie-center-pct">83%</div>
+              <div class="pie-center-label">Filled</div>
+            </div>
+          </div>
+
+          <div class="pie-legend">
+            <div class="pie-legend-item yours">
+              <div class="pie-legend-color" style="background:#22A86B"></div>
+              <div class="pie-legend-name"><strong>Jane Doe (You)</strong></div>
+              <div class="pie-legend-pct">35%</div>
+            </div>
+            <div class="pie-legend-item">
+              <div class="pie-legend-color" style="background:#D4A437"></div>
+              <div class="pie-legend-name">FabricNG Ltd</div>
+              <div class="pie-legend-pct">25%</div>
+            </div>
+            <div class="pie-legend-item">
+              <div class="pie-legend-color" style="background:#4ECDC4"></div>
+              <div class="pie-legend-name">SpiceHQ Exports</div>
+              <div class="pie-legend-pct">18%</div>
+            </div>
+            <div class="pie-legend-item">
+              <div class="pie-legend-color" style="background:#FF6B6B"></div>
+              <div class="pie-legend-name">Crafts+ NG</div>
+              <div class="pie-legend-pct">5%</div>
+            </div>
+            <div class="pie-legend-item">
+              <div class="pie-legend-color" style="background:#e8e2d8;border:1px solid #ccc"></div>
+              <div class="pie-legend-name" style="color:var(--muted)">Available</div>
+              <div class="pie-legend-pct" style="color:var(--muted)">17%</div>
+            </div>
+            <div style="margin-top:var(--space-md);padding-top:var(--space-md);border-top:1px solid var(--cream-dark)">
+              <div style="font-size:0.78rem;color:var(--muted)">Container capacity: <strong style="color:var(--green-deep)">40 m³ (33 tonnes)</strong></div>
+              <div style="font-size:0.78rem;color:var(--muted)">Full threshold: <strong style="color:var(--green-deep)">85% = 34 m³</strong></div>
+              <div style="font-size:0.78rem;color:var(--muted)">Current fill: <strong style="color:var(--green-deep)">33.2 m³ (83%)</strong></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SAVINGS BREAKDOWN -->
+      <div style="margin-bottom:var(--space-md)">
+        <h3 class="section-heading">Aggregation Savings Breakdown</h3>
+      </div>
+
+      <div class="savings-compare">
+        <div class="sc-card">
+          <div class="sc-label">Solo Shipment Cost</div>
+          <div class="sc-value" style="color:var(--red-alert)">£6,200</div>
+          <div class="sc-sub">Full 40ft container, private booking</div>
+        </div>
+        <div class="sc-card highlight">
+          <div class="sc-label">Your Shared Cost</div>
+          <div class="sc-value" style="color:var(--green-deep)">£2,170</div>
+          <div class="sc-sub">35% share of aggregated container</div>
+        </div>
+        <div class="sc-card highlight">
+          <div class="sc-label">Your Saving This Batch</div>
+          <div class="sc-value" style="color:var(--green-bright)">£4,030</div>
+          <div class="sc-sub">↓ 65% vs solo shipment</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="section-heading">Annualised Projection</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:var(--space-md);margin-bottom:var(--space-lg)">
+          <div style="text-align:center">
+            <div style="font-size:0.72rem;font-family:var(--font-mono);text-transform:uppercase;color:var(--muted);letter-spacing:0.07em;margin-bottom:6px">Batches/Year</div>
+            <div style="font-family:var(--font-display);font-size:1.8rem;font-weight:700;color:var(--green-deep)">4</div>
+            <div style="font-size:0.75rem;color:var(--muted)">avg. cadence</div>
+          </div>
+          <div style="text-align:center">
+            <div style="font-size:0.72rem;font-family:var(--font-mono);text-transform:uppercase;color:var(--muted);letter-spacing:0.07em;margin-bottom:6px">Annual Solo Cost</div>
+            <div style="font-family:var(--font-display);font-size:1.8rem;font-weight:700;color:var(--red-alert)">£24,800</div>
+            <div style="font-size:0.75rem;color:var(--muted)">at 4 solo bookings</div>
+          </div>
+          <div style="text-align:center">
+            <div style="font-size:0.72rem;font-family:var(--font-mono);text-transform:uppercase;color:var(--muted);letter-spacing:0.07em;margin-bottom:6px">Annual Shared Cost</div>
+            <div style="font-family:var(--font-display);font-size:1.8rem;font-weight:700;color:var(--green-deep)">£8,680</div>
+            <div style="font-size:0.75rem;color:var(--muted)">at 35% share × 4</div>
+          </div>
+          <div style="text-align:center;background:rgba(34,168,107,0.06);border-radius:var(--radius-md);border:1px solid rgba(34,168,107,0.2);padding:var(--space-md)">
+            <div style="font-size:0.72rem;font-family:var(--font-mono);text-transform:uppercase;color:var(--green-mid);letter-spacing:0.07em;margin-bottom:6px">Annual Saving</div>
+            <div style="font-family:var(--font-display);font-size:1.8rem;font-weight:700;color:var(--green-bright)">£16,120</div>
+            <div style="font-size:0.75rem;color:var(--green-mid);font-weight:600">↓ 65% reduction</div>
+          </div>
+        </div>
+
+        <!-- Journey Timeline -->
+        <div style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--muted);font-family:var(--font-mono);margin-bottom:var(--space-md)">Shipment Journey</div>
+        <div style="display:flex;align-items:center;gap:0;overflow-x:auto;padding-bottom:8px">
+          <div style="text-align:center;min-width:100px">
+            <div style="width:36px;height:36px;border-radius:50%;background:var(--green-bright);color:white;display:flex;align-items:center;justify-content:center;margin:0 auto 6px;font-size:0.9rem">✓</div>
+            <div style="font-size:0.72rem;font-weight:600;color:var(--green-deep)">Batch Open</div>
+            <div style="font-size:0.68rem;color:var(--muted)">01 Jul</div>
+          </div>
+          <div style="flex:1;height:2px;background:var(--green-bright);min-width:40px"></div>
+          <div style="text-align:center;min-width:100px">
+            <div style="width:36px;height:36px;border-radius:50%;background:var(--green-bright);color:white;display:flex;align-items:center;justify-content:center;margin:0 auto 6px;font-size:0.9rem">✓</div>
+            <div style="font-size:0.72rem;font-weight:600;color:var(--green-deep)">Cut-Off</div>
+            <div style="font-size:0.68rem;color:var(--muted)">07 Jul</div>
+          </div>
+          <div style="flex:1;height:2px;background:var(--green-bright);min-width:40px"></div>
+          <div style="text-align:center;min-width:100px">
+            <div style="width:36px;height:36px;border-radius:50%;background:var(--green-bright);color:white;display:flex;align-items:center;justify-content:center;margin:0 auto 6px;font-size:0.9rem">🚢</div>
+            <div style="font-size:0.72rem;font-weight:600;color:var(--green-deep)">Departed</div>
+            <div style="font-size:0.68rem;color:var(--muted)">08 Jul</div>
+          </div>
+          <div style="flex:1;height:2px;background:var(--cream-dark);min-width:40px"></div>
+          <div style="text-align:center;min-width:100px">
+            <div style="width:36px;height:36px;border-radius:50%;background:var(--cream-dark);color:var(--muted);display:flex;align-items:center;justify-content:center;margin:0 auto 6px;font-size:0.9rem">⚓</div>
+            <div style="font-size:0.72rem;color:var(--muted)">Tilbury Arrival</div>
+            <div style="font-size:0.68rem;color:var(--muted)">~22 Jul</div>
+          </div>
+          <div style="flex:1;height:2px;background:var(--cream-dark);min-width:40px"></div>
+          <div style="text-align:center;min-width:100px">
+            <div style="width:36px;height:36px;border-radius:50%;background:var(--cream-dark);color:var(--muted);display:flex;align-items:center;justify-content:center;margin:0 auto 6px;font-size:0.9rem">🏪</div>
+            <div style="font-size:0.72rem;color:var(--muted)">Delivered</div>
+            <div style="font-size:0.68rem;color:var(--muted)">~25 Jul</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+</body>
+</html>
