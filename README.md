@@ -1,4 +1,4 @@
-# NaijaToUK — Import Marketplace Platform
+# GUZE — Import Marketplace Platform
 ## Static HTML Templates
 
 UK's first subscription-powered shared container supply chain for Nigerian imports.
@@ -90,4 +90,4 @@ All pages reference `shared-styles.css` which includes:
 
 ---
 
-*Generated for NaijaToUK Ltd · © 2025*
+*Generated for GUZE Ltd · © 2025*
