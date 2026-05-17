@@ -1,0 +1,300 @@
+/* =============================================
+   GUZE ACCOUNT PAGE — SCROLLING FIX
+   ============================================= */
+
+/* Prevent body from scrolling, hide overflow */
+body {
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Navigation remains fixed at top */
+.nav {
+  height: 68px;
+  flex-shrink: 0;
+}
+
+/* Main account container - takes full viewport minus nav */
+.account-container {
+  height: calc(100vh - 68px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-gutter: stable; /* Prevents layout shift when scrollbar appears */
+  padding: var(--space-lg) 0 0 0;
+}
+
+/* Form section styles */
+.form-section {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  margin-top: var(--space-lg);
+}
+
+.form-section h1 {
+  flex-shrink: 0; /* Header doesn't shrink */
+  margin-bottom: var(--space-md);
+  padding: 0 var(--space-xl);
+}
+
+/* Two-column toggle for auth forms */
+.auth-forms {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-xl);
+  padding: var(--space-xl);
+  margin: var(--space-lg) 0;
+}
+
+/* Fix: constrain register panel to viewport with internal scroll */
+.auth-panel {
+  align-items: first baseline !important;
+  overflow-y: scroll;
+}
+
+/* Individual form wrappers */
+.auth-form {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid rgba(237,231,218,0.8);
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 68px - var(--space-xl) * 2);
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+}
+
+.auth-form h2 {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--green-deep);
+  margin-bottom: var(--space-md);
+}
+
+/* Form group spacing inside scrollable container */
+.form-group {
+  margin-bottom: var(--space-md);
+}
+
+.form-group:last-of-type {
+  margin-bottom: var(--space-lg);
+}
+
+/* Button at form bottom */
+.form-section .btn {
+  margin-top: var(--space-md);
+  width: 100%;
+  justify-content: center;
+}
+
+/* Account type selector grid */
+.account-type-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-md);
+  margin-bottom: var(--space-lg);
+}
+
+.account-type-card {
+  padding: var(--space-md);
+  border: 2px solid var(--cream-dark);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition);
+  text-align: center;
+}
+
+.account-type-card:hover {
+  border-color: var(--green-bright);
+  background: rgba(34,168,107,0.04);
+}
+
+.account-type-card.selected {
+  border-color: var(--green-deep);
+  background: rgba(34,168,107,0.08);
+}
+
+.account-type-card .icon {
+  font-size: 2rem;
+  margin-bottom: var(--space-sm);
+}
+
+.account-type-card .label {
+  font-weight: 600;
+  color: var(--green-deep);
+  font-size: 0.9rem;
+  margin-bottom: var(--space-sm);
+}
+
+.account-type-card .description {
+  font-size: 0.8rem;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+/* Conditional field groups */
+.field-group-retailer,
+.field-group-supplier {
+  padding: var(--space-md);
+  border-radius: var(--radius-md);
+  background: rgba(247,243,236,0.5);
+  margin-bottom: var(--space-lg);
+  display: none;
+}
+
+.field-group-retailer.active,
+.field-group-supplier.active {
+  display: block;
+}
+
+.field-group-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: var(--space-md);
+  display: block;
+}
+
+/* Checkbox and radio styling */
+.form-checkbox,
+.form-radio {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-sm);
+  cursor: pointer;
+}
+
+.form-checkbox input,
+.form-radio input {
+  cursor: pointer;
+}
+
+.form-checkbox label,
+.form-radio label {
+  font-size: 0.85rem;
+  color: var(--ink);
+  cursor: pointer;
+  margin: 0;
+}
+
+/* Terms and conditions text */
+.form-terms {
+  font-size: 0.75rem;
+  color: var(--muted);
+  line-height: 1.6;
+  margin-bottom: var(--space-md);
+}
+
+.form-terms a {
+  color: var(--green-mid);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.form-terms a:hover {
+  color: var(--green-deep);
+  text-decoration: underline;
+}
+
+/* Divider */
+.form-divider {
+  text-align: center;
+  margin: var(--space-lg) 0;
+  position: relative;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.form-divider::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--cream-dark);
+}
+
+.form-divider span {
+  position: relative;
+  background: var(--white);
+  padding: 0 var(--space-sm);
+}
+
+/* Forgot password link */
+.form-forgot-link {
+  display: inline-block;
+  font-size: 0.82rem;
+  color: var(--green-mid);
+  text-decoration: none;
+  margin-bottom: var(--space-md);
+}
+
+.form-forgot-link:hover {
+  color: var(--green-deep);
+  text-decoration: underline;
+}
+
+/* Sign up prompt in sign-in form */
+.form-footer {
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-top: var(--space-lg);
+}
+
+.form-footer a {
+  color: var(--green-mid);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.form-footer a:hover {
+  color: var(--green-deep);
+  text-decoration: underline;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .auth-forms {
+    grid-template-columns: 1fr;
+    gap: var(--space-lg);
+    padding: var(--space-md);
+  }
+
+  .account-type-options {
+    grid-template-columns: 1fr;
+  }
+
+  .auth-form {
+    padding: var(--space-md);
+  }
+
+  .auth-form h2 {
+    font-size: 1.1rem;
+  }
+}
+
+/* Ensure scrollbar styling is consistent */
+.account-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.account-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.account-container::-webkit-scrollbar-thumb {
+  background: var(--cream-dark);
+  border-radius: 4px;
+}
+
+.account-container::-webkit-scrollbar-thumb:hover {
+  background: var(--muted);
+}
