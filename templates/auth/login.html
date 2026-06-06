@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign In — GUZE Trade Platform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;1,9..144,300&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../shared-styles.css" />
+  <style>
+    body { margin: 0; }
+
+    .auth-container {
+      display: flex;
+      min-height: 100vh;
+      background: var(--cream);
+    }
+
+    .auth-visual {
+      flex: 1;
+      background: var(--green-deep);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-3xl) var(--space-xl);
+    }
+
+    .auth-visual::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 70% 40%, rgba(34,168,107,0.15) 0%, transparent 70%),
+                  radial-gradient(ellipse 40% 45% at 30% 70%, rgba(212,164,55,0.08) 0%, transparent 65%);
+    }
+
+    .visual-content {
+      position: relative;
+      z-index: 1;
+      max-width: 480px;
+      color: var(--white);
+    }
+
+    .visual-logo {
+      font-family: var(--font-display);
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: var(--white);
+      margin-bottom: var(--space-lg);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .visual-logo .logo-flag { font-size: 2.5rem; }
+
+    .visual-content h1 {
+      font-family: var(--font-display);
+      font-size: 2.6rem;
+      font-weight: 700;
+      line-height: 1.1;
+      margin-bottom: var(--space-md);
+    }
+
+    .visual-content h1 em {
+      font-style: italic;
+      color: var(--gold-light);
+      font-weight: 300;
+    }
+
+    .visual-desc {
+      font-size: 1.05rem;
+      line-height: 1.7;
+      color: rgba(255,255,255,0.75);
+      margin-bottom: var(--space-xl);
+    }
+
+    .visual-features {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-md);
+    }
+
+    .feature-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      font-size: 0.95rem;
+      color: rgba(255,255,255,0.85);
+    }
+
+    .feature-icon {
+      background: rgba(34,168,107,0.2);
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 1.1rem;
+    }
+
+    .auth-form-container {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-xl);
+      background: var(--white);
+    }
+
+    .auth-form-wrapper {
+      width: 100%;
+      max-width: 420px;
+    }
+
+    .form-header {
+      margin-bottom: var(--space-xl);
+    }
+
+    .form-header h2 {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--green-deep);
+      margin-bottom: var(--space-sm);
+    }
+
+    .form-header p {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .form-group {
+      margin-bottom: var(--space-lg);
+    }
+
+    .form-group.error .form-control {
+      border-color: var(--red-alert);
+    }
+
+    .form-group.error .error-message {
+      display: block;
+    }
+
+    .error-message {
+      display: none;
+      color: var(--red-alert);
+      font-size: 0.8rem;
+      margin-top: 6px;
+      font-weight: 500;
+    }
+
+    .form-options {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--space-lg);
+      font-size: 0.88rem;
+    }
+
+    .remember-me {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--ink-mid);
+    }
+
+    .remember-me input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      accent-color: var(--green-bright);
+    }
+
+    .forgot-link {
+      color: var(--green-mid);
+      text-decoration: none;
+      font-weight: 500;
+      transition: color var(--transition);
+    }
+
+    .forgot-link:hover {
+      color: var(--green-deep);
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 14px;
+      background: var(--green-deep);
+      color: var(--white);
+      border: none;
+      border-radius: var(--radius-full);
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition);
+      margin-bottom: var(--space-md);
+    }
+
+    .submit-btn:hover {
+      background: var(--green-mid);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .submit-btn:active {
+      transform: translateY(0);
+    }
+
+    .submit-btn.loading {
+      pointer-events: none;
+      opacity: 0.7;
+    }
+
+    .loading-spinner {
+      display: none;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255,255,255,0.3);
+      border-top: 3px solid white;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .submit-btn.loading .btn-text {
+      display: none;
+    }
+
+    .submit-btn.loading .loading-spinner {
+      display: block;
+    }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      margin: var(--space-xl) 0;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    .divider::before,
+    .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--cream-dark);
+    }
+
+    .signup-prompt {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-bottom: var(--space-md);
+    }
+
+    .signup-links {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .signup-link {
+      padding: 12px 24px;
+      border: 1.5px solid var(--cream-dark);
+      border-radius: var(--radius-full);
+      text-align: center;
+      text-decoration: none;
+      color: var(--green-deep);
+      font-weight: 600;
+      font-size: 0.88rem;
+      transition: all var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .signup-link:hover {
+      background: var(--cream);
+      border-color: var(--green-bright);
+      color: var(--green-mid);
+    }
+
+    .signup-link .icon {
+      font-size: 1.1rem;
+    }
+
+    @media (max-width: 900px) {
+      .auth-container {
+        flex-direction: column;
+      }
+
+      .auth-visual {
+        min-height: 320px;
+        padding: var(--space-xl) var(--space-md);
+      }
+
+      .visual-content h1 {
+        font-size: 2rem;
+      }
+
+      .auth-form-container {
+        padding: var(--space-lg) var(--space-md);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="auth-container">
+    <!-- Visual Section -->
+    <div class="auth-visual">
+      <div class="visual-content">
+        <div class="visual-logo">
+          <span class="logo-flag">🌍</span>
+          GUZE
+        </div>
+        <h1>Welcome <em>back</em> to the marketplace</h1>
+        <p class="visual-desc">
+          Access your dashboard, manage orders, and connect with trusted suppliers and retailers across borders.
+        </p>
+        <div class="visual-features">
+          <div class="feature-item">
+            <div class="feature-icon">✓</div>
+            <div>Secure authentication with JWT tokens</div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">✓</div>
+            <div>Real-time order tracking & notifications</div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">✓</div>
+            <div>Compliance documentation at your fingertips</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Form Section -->
+    <div class="auth-form-container">
+      <div class="auth-form-wrapper">
+        <div class="form-header">
+          <h2>Sign In</h2>
+          <p>Enter your credentials to access your account</p>
+        </div>
+
+        <form id="loginForm">
+          <div class="form-group">
+            <label class="form-label" for="email">Email Address</label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              class="form-control"
+              placeholder="you@company.com"
+              required
+            />
+            <span class="error-message">Please enter a valid email address</span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="password">Password</label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              class="form-control"
+              placeholder="Enter your password"
+              required
+            />
+            <span class="error-message">Password is required</span>
+          </div>
+
+          <div class="form-options">
+            <label class="remember-me">
+              <input type="checkbox" id="remember" name="remember" />
+              <span>Remember me</span>
+            </label>
+            <a href="password-reset.html" class="forgot-link">Forgot password?</a>
+          </div>
+
+          <button type="submit" class="submit-btn">
+            <span class="btn-text">Sign In</span>
+            <div class="loading-spinner"></div>
+          </button>
+        </form>
+
+        <div class="divider">New to GUZE?</div>
+
+        <div class="signup-prompt">Create an account</div>
+
+        <div class="signup-links">
+          <a href="register-retailer.html" class="signup-link">
+            <span class="icon">🏪</span>
+            <span>Sign up as Retailer</span>
+          </a>
+          <a href="register-supplier.html" class="signup-link">
+            <span class="icon">🏭</span>
+            <span>Sign up as Supplier</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById('loginForm');
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const submitBtn = form.querySelector('.submit-btn');
+
+    // Form validation
+    function validateEmail(email) {
+      const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return regex.test(email);
+    }
+
+    function showError(input) {
+      const group = input.closest('.form-group');
+      group.classList.add('error');
+    }
+
+    function removeError(input) {
+      const group = input.closest('.form-group');
+      group.classList.remove('error');
+    }
+
+    // Real-time validation
+    emailInput.addEventListener('blur', function() {
+      if (this.value && !validateEmail(this.value)) {
+        showError(this);
+      } else {
+        removeError(this);
+      }
+    });
+
+    emailInput.addEventListener('input', function() {
+      if (this.classList.contains('error')) {
+        removeError(this);
+      }
+    });
+
+    passwordInput.addEventListener('input', function() {
+      if (this.classList.contains('error')) {
+        removeError(this);
+      }
+    });
+
+    // Form submission
+    form.addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      // Clear previous errors
+      document.querySelectorAll('.form-group.error').forEach(g => g.classList.remove('error'));
+
+      // Validate
+      let isValid = true;
+
+      if (!validateEmail(emailInput.value)) {
+        showError(emailInput);
+        isValid = false;
+      }
+
+      if (!passwordInput.value || passwordInput.value.length < 6) {
+        showError(passwordInput);
+        isValid = false;
+      }
+
+      if (!isValid) return;
+
+      // Show loading state
+      submitBtn.classList.add('loading');
+
+      try {
+        // TODO: Replace with actual API call
+        // const response = await fetch('/api/auth/login', {
+        //   method: 'POST',
+        //   headers: { 'Content-Type': 'application/json' },
+        //   body: JSON.stringify({
+        //     email: emailInput.value,
+        //     password: passwordInput.value
+        //   })
+        // });
+        
+        // Simulate API call
+        await new Promise(resolve => setTimeout(resolve, 1500));
+
+        // Store remember me preference
+        const remember = document.getElementById('remember').checked;
+        if (remember) {
+          localStorage.setItem('guze_remember_email', emailInput.value);
+        }
+
+        // Redirect to dashboard (role-based in production)
+        window.location.href = '../account.html';
+        
+      } catch (error) {
+        console.error('Login failed:', error);
+        showError(emailInput);
+        showError(passwordInput);
+      } finally {
+        submitBtn.classList.remove('loading');
+      }
+    });
+
+    // Pre-fill email if remembered
+    window.addEventListener('load', function() {
+      const savedEmail = localStorage.getItem('guze_remember_email');
+      if (savedEmail) {
+        emailInput.value = savedEmail;
+        document.getElementById('remember').checked = true;
+      }
+    });
+  </script>
+</body>
+</html>

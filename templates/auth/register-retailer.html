@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Retailer Sign Up — GUZE Trade Platform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;1,9..144,300&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../shared-styles.css" />
+  <style>
+    body { margin: 0; overflow-x: hidden; }
+
+    .auth-container {
+      display: flex;
+      min-height: 100vh;
+      background: var(--cream);
+    }
+
+    .auth-visual {
+      flex: 1;
+      background: var(--green-deep);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-2xl) var(--space-xl);
+    }
+
+    .auth-visual::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 70% 40%, rgba(34,168,107,0.15) 0%, transparent 70%),
+                  radial-gradient(ellipse 40% 45% at 30% 70%, rgba(212,164,55,0.08) 0%, transparent 65%);
+    }
+
+    .visual-content {
+      position: relative;
+      z-index: 1;
+      max-width: 480px;
+      color: var(--white);
+    }
+
+    .visual-logo {
+      font-family: var(--font-display);
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--white);
+      margin-bottom: var(--space-lg);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .visual-logo .logo-flag { font-size: 2rem; }
+
+    .user-type-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(34,168,107,0.2);
+      border: 1px solid rgba(34,168,107,0.3);
+      color: var(--green-light);
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 6px 14px;
+      border-radius: var(--radius-full);
+      margin-bottom: var(--space-md);
+    }
+
+    .visual-content h1 {
+      font-family: var(--font-display);
+      font-size: 2.2rem;
+      font-weight: 700;
+      line-height: 1.15;
+      margin-bottom: var(--space-md);
+    }
+
+    .visual-content h1 em {
+      font-style: italic;
+      color: var(--gold-light);
+      font-weight: 300;
+    }
+
+    .visual-desc {
+      font-size: 0.98rem;
+      line-height: 1.7;
+      color: rgba(255,255,255,0.75);
+      margin-bottom: var(--space-xl);
+    }
+
+    .visual-benefits {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .benefit-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.9rem;
+      color: rgba(255,255,255,0.85);
+    }
+
+    .benefit-check {
+      background: rgba(34,168,107,0.2);
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-weight: 700;
+      color: var(--green-light);
+    }
+
+    .auth-form-container {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-xl);
+      background: var(--white);
+      overflow-y: auto;
+      max-height: 100vh;
+    }
+
+    .auth-form-wrapper {
+      width: 100%;
+      max-width: 460px;
+      padding: var(--space-md) 0;
+    }
+
+    .form-header {
+      margin-bottom: var(--space-xl);
+    }
+
+    .form-header h2 {
+      font-family: var(--font-display);
+      font-size: 1.9rem;
+      font-weight: 700;
+      color: var(--green-deep);
+      margin-bottom: var(--space-sm);
+    }
+
+    .form-header p {
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-md);
+      margin-bottom: var(--space-md);
+    }
+
+    .form-row .form-group {
+      margin-bottom: 0;
+    }
+
+    .form-group.error .form-control {
+      border-color: var(--red-alert);
+    }
+
+    .form-group.error .error-message {
+      display: block;
+    }
+
+    .error-message {
+      display: none;
+      color: var(--red-alert);
+      font-size: 0.78rem;
+      margin-top: 5px;
+      font-weight: 500;
+    }
+
+    .password-requirements {
+      background: var(--cream);
+      border-radius: var(--radius-md);
+      padding: 12px;
+      margin-top: 8px;
+      font-size: 0.82rem;
+    }
+
+    .requirement {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+      color: var(--muted);
+    }
+
+    .requirement::before {
+      content: '○';
+      font-weight: 700;
+      width: 16px;
+      flex-shrink: 0;
+    }
+
+    .requirement.met {
+      color: var(--green-mid);
+    }
+
+    .requirement.met::before {
+      content: '✓';
+    }
+
+    .checkbox-group {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: var(--space-lg);
+      padding: 12px;
+      background: var(--cream);
+      border-radius: var(--radius-md);
+    }
+
+    .checkbox-group input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      margin-top: 2px;
+      cursor: pointer;
+      accent-color: var(--green-bright);
+      flex-shrink: 0;
+    }
+
+    .checkbox-group label {
+      font-size: 0.88rem;
+      line-height: 1.5;
+      cursor: pointer;
+      color: var(--ink-mid);
+    }
+
+    .checkbox-group a {
+      color: var(--green-mid);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .checkbox-group a:hover {
+      color: var(--green-deep);
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 14px;
+      background: var(--green-deep);
+      color: var(--white);
+      border: none;
+      border-radius: var(--radius-full);
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition);
+      margin-bottom: var(--space-md);
+    }
+
+    .submit-btn:hover {
+      background: var(--green-mid);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .submit-btn.loading {
+      pointer-events: none;
+      opacity: 0.7;
+    }
+
+    .loading-spinner {
+      display: none;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255,255,255,0.3);
+      border-top: 3px solid white;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .submit-btn.loading .btn-text { display: none; }
+    .submit-btn.loading .loading-spinner { display: block; }
+
+    .login-prompt {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .login-prompt a {
+      color: var(--green-mid);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .login-prompt a:hover {
+      color: var(--green-deep);
+    }
+
+    @media (max-width: 900px) {
+      .auth-container { flex-direction: column; }
+      .auth-visual {
+        min-height: 280px;
+        padding: var(--space-xl) var(--space-md);
+      }
+      .visual-content h1 { font-size: 1.8rem; }
+      .auth-form-container {
+        padding: var(--space-lg) var(--space-md);
+        max-height: none;
+      }
+      .form-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="auth-container">
+    <!-- Visual Section -->
+    <div class="auth-visual">
+      <div class="visual-content">
+        <div class="visual-logo">
+          <span class="logo-flag">🏪</span>
+          GUZE
+        </div>
+        <div class="user-type-badge">
+          <span>●</span>
+          <span>Retailer Account</span>
+        </div>
+        <h1>Source quality products <em>globally</em></h1>
+        <p class="visual-desc">
+          Access verified suppliers from Africa. Build reliable supply chains. Grow your retail business with confidence.
+        </p>
+        <div class="visual-benefits">
+          <div class="benefit-item">
+            <div class="benefit-check">✓</div>
+            <div>Vetted supplier network</div>
+          </div>
+          <div class="benefit-item">
+            <div class="benefit-check">✓</div>
+            <div>Competitive wholesale pricing</div>
+          </div>
+          <div class="benefit-item">
+            <div class="benefit-check">✓</div>
+            <div>Streamlined compliance & logistics</div>
+          </div>
+          <div class="benefit-item">
+            <div class="benefit-check">✓</div>
+            <div>24/7 platform support</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Form Section -->
+    <div class="auth-form-container">
+      <div class="auth-form-wrapper">
+        <div class="form-header">
+          <h2>Create Retailer Account</h2>
+          <p>Join the marketplace and start sourcing today</p>
+        </div>
+
+        <form id="registrationForm">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="firstName">First Name</label>
+              <input type="text" id="firstName" name="firstName" class="form-control" placeholder="John" required />
+              <span class="error-message">First name is required</span>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="lastName">Last Name</label>
+              <input type="text" id="lastName" name="lastName" class="form-control" placeholder="Smith" required />
+              <span class="error-message">Last name is required</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="businessName">Business Name</label>
+            <input type="text" id="businessName" name="businessName" class="form-control" placeholder="Your Store Ltd" required />
+            <span class="error-message">Business name is required</span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="email">Email Address</label>
+            <input type="email" id="email" name="email" class="form-control" placeholder="you@business.com" required />
+            <span class="error-message">Please enter a valid email</span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="phone">Phone Number</label>
+            <input type="tel" id="phone" name="phone" class="form-control" placeholder="+44 20 7946 0958" required />
+            <span class="error-message">Phone number is required</span>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="country">Country</label>
+              <select id="country" name="country" class="form-control" required>
+                <option value="">Select country</option>
+                <option value="gb">United Kingdom</option>
+                <option value="ie">Ireland</option>
+                <option value="eu">Other EU</option>
+              </select>
+              <span class="error-message">Country is required</span>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="regNumber">Company Number</label>
+              <input type="text" id="regNumber" name="regNumber" class="form-control" placeholder="12345678" required />
+              <span class="error-message">Required</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="password">Password</label>
+            <input type="password" id="password" name="password" class="form-control" placeholder="Create a secure password" required />
+            <div class="password-requirements">
+              <div class="requirement length-req">At least 8 characters</div>
+              <div class="requirement uppercase-req">One uppercase letter</div>
+              <div class="requirement number-req">One number</div>
+              <div class="requirement special-req">One special character (!@#$%)</div>
+            </div>
+            <span class="error-message">Password does not meet requirements</span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="confirmPassword">Confirm Password</label>
+            <input type="password" id="confirmPassword" name="confirmPassword" class="form-control" placeholder="Re-enter password" required />
+            <span class="error-message">Passwords do not match</span>
+          </div>
+
+          <div class="checkbox-group">
+            <input type="checkbox" id="terms" name="terms" required />
+            <label for="terms">I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></label>
+          </div>
+
+          <button type="submit" class="submit-btn">
+            <span class="btn-text">Create Account</span>
+            <div class="loading-spinner"></div>
+          </button>
+
+          <div class="login-prompt">
+            Already have an account? <a href="login.html">Sign in here</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById('registrationForm');
+    const password = document.getElementById('password');
+    const confirmPassword = document.getElementById('confirmPassword');
+
+    function validateEmail(email) {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    }
+
+    function validatePassword(pwd) {
+      return pwd.length >= 8 && /[A-Z]/.test(pwd) && /\d/.test(pwd) && /[!@#$%^&*]/.test(pwd);
+    }
+
+    function updatePasswordRequirements(pwd) {
+      document.querySelector('.length-req').classList.toggle('met', pwd.length >= 8);
+      document.querySelector('.uppercase-req').classList.toggle('met', /[A-Z]/.test(pwd));
+      document.querySelector('.number-req').classList.toggle('met', /\d/.test(pwd));
+      document.querySelector('.special-req').classList.toggle('met', /[!@#$%^&*]/.test(pwd));
+    }
+
+    function showError(input) {
+      input.closest('.form-group').classList.add('error');
+    }
+
+    function removeError(input) {
+      input.closest('.form-group').classList.remove('error');
+    }
+
+    password.addEventListener('input', function() {
+      updatePasswordRequirements(this.value);
+      removeError(this);
+    });
+
+    confirmPassword.addEventListener('blur', function() {
+      if (this.value !== password.value) showError(this);
+      else removeError(this);
+    });
+
+    form.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      document.querySelectorAll('.form-group.error').forEach(g => g.classList.remove('error'));
+
+      let isValid = true;
+      const inputs = form.querySelectorAll('[required]');
+      
+      inputs.forEach(input => {
+        if (!input.value) {
+          showError(input);
+          isValid = false;
+        }
+      });
+
+      if (!validateEmail(document.getElementById('email').value)) {
+        showError(document.getElementById('email'));
+        isValid = false;
+      }
+
+      if (!validatePassword(password.value)) {
+        showError(password);
+        isValid = false;
+      }
+
+      if (confirmPassword.value !== password.value) {
+        showError(confirmPassword);
+        isValid = false;
+      }
+
+      if (!isValid) return;
+
+      const submitBtn = form.querySelector('.submit-btn');
+      submitBtn.classList.add('loading');
+
+      try {
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        window.location.href = 'login.html?registered=true';
+      } catch (error) {
+        console.error('Registration failed:', error);
+      } finally {
+        submitBtn.classList.remove('loading');
+      }
+    });
+  </script>
+</body>
+</html>

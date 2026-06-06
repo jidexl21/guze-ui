@@ -1,0 +1,16 @@
+import http from './http'
+const BASE = '/api/v1/Products'
+export const getProducts       = (p={})         => http.get(BASE, { params: p }).then(r => r.data)
+export const getProduct        = (id)           => http.get(`${BASE}/${id}`).then(r => r.data)
+export const createProduct     = (p)            => http.post(BASE, p).then(r => r.data)
+export const updateProduct     = (id, p)        => http.put(`${BASE}/${id}`, p).then(r => r.data)
+export const deleteProduct     = (id)           => http.delete(`${BASE}/${id}`)
+export const getByCategory     = (cat, p={})    => http.get(`${BASE}/category/${cat}`, { params: p }).then(r => r.data)
+export const getBySupplier     = (id, p={})     => http.get(`${BASE}/supplier/${id}`, { params: p }).then(r => r.data)
+export const searchProducts    = (query, p={})  => http.get(`${BASE}/search/query`, { params: { query, ...p } }).then(r => r.data)
+export const getFeatured       = (pageSize=10)  => http.get(`${BASE}/featured/list`, { params: { pageSize } }).then(r => r.data)
+export const getCategories     = ()             => http.get(`${BASE}/categories/list`).then(r => r.data)
+export const getLowStock       = (p={})         => http.get(`${BASE}/low-stock/list`, { params: p }).then(r => r.data)
+export const updateStock       = (id, qty)      => http.patch(`${BASE}/${id}/stock`, null, { params: { newQuantity: qty } }).then(r => r.data)
+export const bulkUpdateStock   = (p)            => http.patch(`${BASE}/bulk-update-stock`, p).then(r => r.data)
+export const setFeatured       = (id, val)      => http.patch(`${BASE}/${id}/featured`, null, { params: { isFeatured: val } }).then(r => r.data)
