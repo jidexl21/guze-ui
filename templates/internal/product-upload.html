@@ -1,0 +1,1121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Add Product — GUZE Supplier</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../shared-styles.css" />
+  <style>
+    /* ── Supplier sidebar override ── */
+    .sidebar { background: #1A1A2E !important; }
+    .sidebar-section-label { color: rgba(255,255,255,0.3) !important; }
+    .sidebar-link.active { background: rgba(255,255,255,0.1) !important; color: white !important; border-left-color: var(--gold) !important; }
+
+    /* ── Steps container ── */
+    .steps-container { max-width: 860px; }
+
+    /* ── Form card base ── */
+    .form-card {
+      background: var(--white);
+      border: 1px solid var(--cream-dark);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      margin-bottom: var(--space-lg);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    /* Active card gets green ring */
+    .form-card[data-state="active"] {
+      border-color: var(--green-bright);
+      box-shadow: 0 0 0 3px rgba(34,168,107,0.1);
+    }
+
+    /* ── Card header ── */
+    .form-card-header {
+      padding: var(--space-md) var(--space-xl);
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      transition: background var(--transition);
+    }
+
+    /* Separator only when body is visible */
+    .form-card[data-state="active"] .form-card-header {
+      border-bottom: 1px solid var(--cream-dark);
+      background: rgba(34,168,107,0.03);
+    }
+
+    /* Done header — clickable */
+    .form-card[data-state="done"] .form-card-header { cursor: pointer; }
+    .form-card[data-state="done"] .form-card-header:hover { background: var(--cream); }
+
+    /* Locked header — dimmed, inert */
+    .form-card[data-state="locked"] .form-card-header { opacity: 0.45; cursor: not-allowed; }
+
+    /* ── Step badge ── */
+    .form-card-number {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      background: var(--green-deep);
+      color: var(--white);
+      font-size: 0.78rem;
+      font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      font-family: var(--font-mono);
+      transition: background var(--transition);
+    }
+    .form-card[data-state="active"]  .form-card-number { background: var(--green-bright); }
+    .form-card[data-state="done"]    .form-card-number { background: var(--green-bright); }
+    .form-card[data-state="locked"]  .form-card-number { background: var(--cream-dark); color: var(--ink-mid); }
+
+    .form-card-title {
+      font-family: var(--font-display);
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--green-deep);
+    }
+    .form-card[data-state="locked"] .form-card-title { color: var(--ink-mid); }
+
+    .form-card-subtitle {
+      font-size: 0.76rem;
+      color: var(--muted);
+      margin-top: 1px;
+    }
+
+    /* ── Edit button (done state only) ── */
+    .step-edit-btn { margin-left: auto; flex-shrink: 0; font-size: 0.78rem; }
+    .form-card:not([data-state="done"]) .step-edit-btn { display: none !important; }
+
+    /* ── Card body visibility ── */
+    .form-card-body { padding: var(--space-xl); }
+    .form-card[data-state="done"]   .form-card-body,
+    .form-card[data-state="locked"] .form-card-body { display: none; }
+    .form-card[data-state="active"] .form-card-body { display: block; }
+
+    /* ── Form rows ── */
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-lg);
+      margin-bottom: var(--space-lg);
+    }
+    .form-row.thirds { grid-template-columns: 1fr 1fr 1fr; }
+    .form-row:last-of-type { margin-bottom: 0; }
+
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group.full { grid-column: 1 / -1; }
+
+    .form-label { font-size: 0.8rem; font-weight: 600; color: var(--ink-mid); letter-spacing: 0.01em; }
+    .form-label .required { color: var(--red-alert); margin-left: 2px; }
+
+    .form-control {
+      padding: 10px 14px;
+      border: 1.5px solid var(--cream-dark);
+      border-radius: var(--radius-md);
+      font-family: var(--font-body);
+      font-size: 0.88rem;
+      color: var(--ink);
+      background: var(--white);
+      transition: border-color var(--transition);
+      outline: none;
+    }
+    .form-control:focus { border-color: var(--green-bright); box-shadow: 0 0 0 3px rgba(34,168,107,0.12); }
+    .form-control.error { border-color: var(--red-alert) !important; box-shadow: 0 0 0 3px rgba(220,38,38,0.1) !important; }
+    .form-hint { font-size: 0.74rem; color: var(--muted); }
+    textarea.form-control { resize: vertical; min-height: 100px; }
+
+    /* ── Validation message ── */
+    .validation-msg {
+      font-size: 0.78rem;
+      color: var(--red-alert);
+      padding: 10px var(--space-md);
+      background: rgba(220,38,38,0.06);
+      border-radius: var(--radius-md);
+      border: 1px solid rgba(220,38,38,0.2);
+      margin-bottom: var(--space-md);
+    }
+
+    /* ── Sub-section divider within a step ── */
+    .step-section {
+      margin-top: var(--space-xl);
+      padding-top: var(--space-xl);
+      border-top: 1px solid var(--cream-dark);
+    }
+    .step-section-title {
+      font-family: var(--font-display);
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--green-deep);
+      margin-bottom: 4px;
+    }
+    .step-section-subtitle { font-size: 0.76rem; color: var(--muted); margin-bottom: var(--space-lg); }
+
+    /* ── Step actions footer ── */
+    .step-actions {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: var(--space-md);
+      margin-top: var(--space-xl);
+      padding-top: var(--space-lg);
+      border-top: 1px solid var(--cream-dark);
+    }
+
+    /* ── Image upload grid ── */
+    .image-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--space-md);
+    }
+    .image-slot {
+      aspect-ratio: 1;
+      border: 2px dashed var(--cream-dark);
+      border-radius: var(--radius-md);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all var(--transition);
+      background: var(--cream);
+      font-size: 0.72rem;
+      color: var(--muted);
+      gap: 6px;
+      text-align: center;
+      padding: var(--space-sm);
+      overflow: hidden;
+      position: relative;
+    }
+    .image-slot:hover { border-color: var(--green-bright); background: rgba(34,168,107,0.04); }
+    .image-slot.primary-slot { border-color: var(--gold); }
+    .image-slot .slot-icon { font-size: 1.4rem; }
+    .image-slot.primary-slot::after {
+      content: 'PRIMARY';
+      position: absolute; bottom: 0; left: 0; right: 0;
+      background: var(--gold); color: white;
+      font-size: 0.62rem; font-family: var(--font-mono); font-weight: 700;
+      text-align: center; padding: 3px; letter-spacing: 0.08em;
+    }
+
+    /* ── Price calculator strip ── */
+    .price-strip {
+      background: var(--cream);
+      border-radius: var(--radius-md);
+      padding: var(--space-lg);
+      margin-top: var(--space-md);
+      display: grid;
+      grid-template-columns: 1fr auto 1fr auto 1fr;
+      align-items: center;
+      gap: var(--space-md);
+      text-align: center;
+    }
+    .price-strip-arrow { font-size: 1.2rem; color: var(--muted); }
+    .price-strip-label { font-size: 0.7rem; font-family: var(--font-mono); text-transform: uppercase; color: var(--muted); letter-spacing: 0.08em; margin-bottom: 4px; }
+    .price-strip-val { font-family: var(--font-display); font-size: 1.2rem; font-weight: 700; color: var(--green-deep); }
+    .price-strip-val.gold { color: var(--gold); }
+
+    /* ── HS code helper ── */
+    .hs-helper {
+      background: rgba(41,128,185,0.06);
+      border: 1.5px solid rgba(41,128,185,0.2);
+      border-radius: var(--radius-md);
+      padding: var(--space-md);
+      margin-top: var(--space-sm);
+      font-size: 0.78rem;
+      color: var(--ink-mid);
+    }
+
+    /* ── Compliance docs ── */
+    .doc-attach-list { display: flex; flex-direction: column; gap: var(--space-sm); }
+    .doc-attach-item {
+      display: flex; align-items: center; gap: var(--space-sm);
+      padding: 10px var(--space-md);
+      border: 1.5px solid var(--cream-dark);
+      border-radius: var(--radius-md);
+      background: var(--white);
+      cursor: pointer;
+      transition: all var(--transition);
+      font-size: 0.82rem; color: var(--ink-mid);
+    }
+    .doc-attach-item:hover { border-color: var(--green-bright); background: rgba(34,168,107,0.04); }
+    .doc-attach-item.selected { border-color: var(--green-bright); background: rgba(34,168,107,0.06); }
+    .doc-attach-item input[type=checkbox] { accent-color: var(--green-bright); width: 16px; height: 16px; flex-shrink: 0; }
+    .doc-attach-meta { flex: 1; }
+    .doc-attach-name { font-weight: 500; }
+    .doc-attach-type { font-size: 0.72rem; color: var(--muted); }
+
+    /* ── Tag input ── */
+    .tag-wrap {
+      display: flex; flex-wrap: wrap; gap: 6px;
+      padding: 8px 10px;
+      border: 1.5px solid var(--cream-dark);
+      border-radius: var(--radius-md);
+      min-height: 44px; cursor: text; align-items: center;
+      transition: border-color var(--transition);
+    }
+    .tag-wrap:focus-within { border-color: var(--green-bright); box-shadow: 0 0 0 3px rgba(34,168,107,0.12); }
+    .tag-pill {
+      background: rgba(34,168,107,0.1); color: var(--green-mid);
+      font-size: 0.76rem; padding: 3px 8px;
+      border-radius: var(--radius-full);
+      border: 1px solid rgba(34,168,107,0.25);
+      display: flex; align-items: center; gap: 4px;
+    }
+    .tag-remove { cursor: pointer; opacity: 0.6; font-size: 0.8rem; }
+    .tag-remove:hover { opacity: 1; }
+    .tag-input { border: none; outline: none; font-size: 0.85rem; font-family: var(--font-body); min-width: 80px; flex: 1; background: transparent; }
+
+    /* ── Step progress bar ── */
+    .step-progress {
+      display: flex; align-items: center;
+      margin-bottom: var(--space-xl);
+      background: var(--white);
+      border: 1px solid var(--cream-dark);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+    .step-item {
+      flex: 1; padding: 12px var(--space-md);
+      text-align: center; font-size: 0.78rem;
+      color: var(--muted); border-right: 1px solid var(--cream-dark);
+      transition: background var(--transition); user-select: none;
+    }
+    .step-item:last-child { border-right: none; }
+    .step-item.active { background: rgba(34,168,107,0.06); color: var(--green-mid); font-weight: 700; }
+    .step-item.done { background: var(--cream); color: var(--green-bright); cursor: pointer; }
+    .step-item.done:hover { background: rgba(34,168,107,0.08); }
+    .step-num {
+      display: inline-flex; width: 20px; height: 20px;
+      border-radius: 50%;
+      background: var(--cream-dark); color: var(--muted);
+      font-size: 0.72rem; font-weight: 700;
+      align-items: center; justify-content: center;
+      margin-bottom: 3px;
+    }
+    .step-item.active .step-num { background: var(--green-bright); color: white; }
+    .step-item.done .step-num { background: var(--green-bright); color: white; }
+
+    /* ── Visibility options ── */
+    .visibility-option {
+      display: flex; align-items: center; gap: var(--space-md);
+      cursor: pointer; padding: 12px var(--space-md);
+      border-radius: var(--radius-md);
+      border: 1.5px solid var(--cream-dark);
+      transition: all var(--transition); margin-bottom: var(--space-sm);
+    }
+    .visibility-option:last-child { margin-bottom: 0; }
+    .visibility-option.checked { border-color: var(--green-bright); background: rgba(34,168,107,0.06); }
+    .visibility-option input[type=radio] { accent-color: var(--green-bright); flex-shrink: 0; }
+
+    /* ── Review step ── */
+    .review-summary {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-lg);
+      margin-bottom: var(--space-xl);
+    }
+    .review-block {
+      background: var(--cream);
+      border-radius: var(--radius-md);
+      padding: var(--space-lg);
+    }
+    .review-block-label {
+      font-size: 0.7rem; font-family: var(--font-mono);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      color: var(--muted); margin-bottom: var(--space-sm);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .review-block-edit {
+      color: var(--green-mid); cursor: pointer; text-decoration: none;
+      font-size: 0.75rem; font-family: var(--font-body); text-transform: none; letter-spacing: 0;
+    }
+    .review-block-edit:hover { text-decoration: underline; }
+    .review-block-content { font-size: 0.88rem; color: var(--ink); line-height: 1.6; }
+
+    /* ── Publish action block ── */
+    .publish-action {
+      background: linear-gradient(135deg, var(--green-deep), #0D4830);
+      border-radius: var(--radius-lg);
+      padding: var(--space-xl);
+      color: var(--white);
+      text-align: center;
+    }
+    .publish-action-title { font-family: var(--font-display); font-size: 1.1rem; font-weight: 700; margin-bottom: var(--space-sm); }
+    .publish-action-hint { font-size: 0.82rem; opacity: 0.65; margin-bottom: var(--space-xl); line-height: 1.6; }
+    .btn-white { background: var(--white); color: var(--green-deep); border: none; font-weight: 700; }
+    .btn-white:hover { background: var(--cream); }
+    .btn-white-outline { background: transparent; color: rgba(255,255,255,0.8); border: 1.5px solid rgba(255,255,255,0.3); font-weight: 500; }
+    .btn-white-outline:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.6); }
+
+    @media (max-width: 768px) {
+      .form-row, .form-row.thirds { grid-template-columns: 1fr; }
+      .image-grid { grid-template-columns: repeat(2, 1fr); }
+      .price-strip { grid-template-columns: 1fr; }
+      .price-strip-arrow { display: none; }
+      .review-summary { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+
+  <!-- SUPPLIER SIDEBAR -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <a href="../index.html" style="font-family:var(--font-display);font-size:1.1rem;font-weight:700;color:white;text-decoration:none;display:flex;align-items:center;gap:8px;">
+        <span>🇳🇬</span> GUZE Supplier
+      </a>
+    </div>
+    <div class="sidebar-nav">
+      <div class="sidebar-section-label">Supplier Portal</div>
+      <a href="supplier-dashboard.html" class="sidebar-link"><span class="icon">📊</span> Dashboard</a>
+      <a href="supplier-products.html" class="sidebar-link active"><span class="icon">📦</span> My Products</a>
+      <a href="supplier-orders.html" class="sidebar-link"><span class="icon">🛒</span> Orders</a>
+      <a href="supplier-invoices.html" class="sidebar-link"><span class="icon">🧾</span> Invoices</a>
+      <div class="sidebar-section-label">Compliance</div>
+      <a href="supplier-compliance.html" class="sidebar-link"><span class="icon">✅</span> Documents</a>
+      <a href="supplier-shipments.html" class="sidebar-link"><span class="icon">🚢</span> Shipments</a>
+      <div class="sidebar-section-label">Account</div>
+      <a href="supplier-settings.html" class="sidebar-link"><span class="icon">⚙️</span> Settings</a>
+    </div>
+    <div class="sidebar-footer">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <div style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;font-size:0.82rem;color:white;font-weight:700;flex-shrink:0">LF</div>
+        <div>
+          <div style="font-size:0.82rem;color:white;font-weight:600">Lagos Foods Ltd</div>
+          <div style="font-size:0.7rem;color:rgba(255,255,255,0.4)">Supplier · Approved</div>
+        </div>
+      </div>
+      <a href="../index.html" class="sidebar-link" style="font-size:0.8rem;padding:6px 16px"><span class="icon">↩️</span> Sign Out</a>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <div class="main-content">
+    <div class="page-header">
+      <div>
+        <div style="display:flex;align-items:center;gap:var(--space-sm);margin-bottom:4px">
+          <a href="supplier-products.html" style="font-size:0.82rem;color:var(--muted);text-decoration:none;">My Products</a>
+          <span style="color:var(--muted)">›</span>
+          <span style="font-size:0.82rem;color:var(--ink-mid)">Add New Product</span>
+        </div>
+        <div class="page-title">Add New Product</div>
+        <div class="page-subtitle">Fill in product details, pricing, and attach compliance documents</div>
+      </div>
+      <div style="display:flex;gap:var(--space-sm)">
+        <button class="btn btn-ghost btn-sm">Save Draft</button>
+        <a href="supplier-products.html" class="btn btn-outline btn-sm">Discard</a>
+      </div>
+    </div>
+
+    <div class="page-body">
+
+      <!-- Step progress bar -->
+      <div class="step-progress">
+        <div class="step-item active" id="progress-1">
+          <div><div class="step-num">1</div></div>
+          <div>Product Info</div>
+        </div>
+        <div class="step-item" id="progress-2">
+          <div><div class="step-num">2</div></div>
+          <div>Pricing &amp; Stock</div>
+        </div>
+        <div class="step-item" id="progress-3">
+          <div><div class="step-num">3</div></div>
+          <div>Import Details</div>
+        </div>
+        <div class="step-item" id="progress-4">
+          <div><div class="step-num">4</div></div>
+          <div>Compliance</div>
+        </div>
+        <div class="step-item" id="progress-5">
+          <div><div class="step-num">5</div></div>
+          <div>Review &amp; Publish</div>
+        </div>
+      </div>
+
+      <div class="steps-container">
+
+        <!-- ═══════════════════════════════════════
+             STEP 1 — Product Info + Images
+        ════════════════════════════════════════ -->
+        <div class="form-card" data-step="1" data-state="active" id="step-card-1">
+          <div class="form-card-header" onclick="handleHeaderClick(1)">
+            <div class="form-card-number" id="badge-1">1</div>
+            <div style="flex:1;min-width:0">
+              <div class="form-card-title">Product Information</div>
+              <div class="form-card-subtitle" id="subtitle-1">Name, description, category, and identifiers</div>
+            </div>
+            <button class="btn btn-ghost btn-sm step-edit-btn" onclick="editStep(event,1)">Edit</button>
+          </div>
+          <div class="form-card-body">
+            <div class="form-row">
+              <div class="form-group full">
+                <label class="form-label">Product Name <span class="required">*</span></label>
+                <input type="text" class="form-control" id="product-name" placeholder="e.g. Premium Jollof Rice Spice Mix 200g" />
+                <span class="form-hint">Be specific — include weight or size where relevant</span>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Category <span class="required">*</span></label>
+                <select class="form-control" id="product-category">
+                  <option value="">Select…</option>
+                  <option>Spices &amp; Seasonings</option>
+                  <option>Grains &amp; Flours</option>
+                  <option>Condiments &amp; Sauces</option>
+                  <option>Dried Goods</option>
+                  <option>Beverages</option>
+                  <option>Snacks &amp; Confectionery</option>
+                  <option>Personal Care</option>
+                  <option>Household Products</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Sub-Category</label>
+                <select class="form-control">
+                  <option value="">Select…</option>
+                  <option>Rice Seasoning</option>
+                  <option>Dry Rubs</option>
+                  <option>Pepper Blends</option>
+                  <option>Soup Bases</option>
+                </select>
+              </div>
+              <div class="form-group full">
+                <label class="form-label">Product Description <span class="required">*</span></label>
+                <textarea class="form-control" id="product-desc" rows="4" placeholder="Describe the product — ingredients, use cases, storage instructions, shelf life…"></textarea>
+                <span class="form-hint">Min. 50 characters. This appears on the product catalogue page.</span>
+              </div>
+              <div class="form-group">
+                <label class="form-label">SKU / Product Code</label>
+                <input type="text" class="form-control" placeholder="LFL-JMX-200" style="font-family:var(--font-mono)" />
+                <span class="form-hint">Your internal reference code</span>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Barcode (EAN/UPC)</label>
+                <input type="text" class="form-control" placeholder="5012345678901" style="font-family:var(--font-mono)" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Brand</label>
+                <input type="text" class="form-control" placeholder="Lagos Foods" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Manufacturer</label>
+                <input type="text" class="form-control" placeholder="Lagos Foods Ltd" />
+              </div>
+              <div class="form-group full">
+                <label class="form-label">Search Tags</label>
+                <div class="tag-wrap" onclick="this.querySelector('.tag-input').focus()">
+                  <div class="tag-pill">jollof rice<span class="tag-remove" onclick="removeTag(this)">×</span></div>
+                  <div class="tag-pill">nigerian spice<span class="tag-remove" onclick="removeTag(this)">×</span></div>
+                  <input class="tag-input" type="text" placeholder="Add tag…" onkeydown="handleTagInput(event,this)" />
+                </div>
+                <span class="form-hint">Press Enter or comma to add. Helps buyers find your product.</span>
+              </div>
+            </div>
+
+            <!-- Images sub-section -->
+            <div class="step-section">
+              <div class="step-section-title">Product Images</div>
+              <div class="step-section-subtitle">Upload up to 8 photos. First image is the primary listing photo.</div>
+              <div class="image-grid">
+                <div class="image-slot primary-slot" onclick="triggerImageUpload(0)">
+                  <div class="slot-icon">📷</div>
+                  <span>Add Photo</span>
+                </div>
+                <div class="image-slot" onclick="triggerImageUpload(1)">
+                  <div class="slot-icon">+</div>
+                  <span>Add Photo</span>
+                </div>
+                <div class="image-slot" onclick="triggerImageUpload(2)">
+                  <div class="slot-icon">+</div>
+                  <span>Add Photo</span>
+                </div>
+                <div class="image-slot" onclick="triggerImageUpload(3)">
+                  <div class="slot-icon">+</div>
+                  <span>Add Photo</span>
+                </div>
+              </div>
+              <div style="margin-top:var(--space-md);font-size:0.76rem;color:var(--muted)">
+                Accepted: JPG, PNG, WebP · Max 5 MB per image · Min 800×800 px recommended
+              </div>
+            </div>
+
+            <div class="step-actions">
+              <button class="btn btn-primary" onclick="nextStep(1)">Continue: Pricing &amp; Stock →</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════
+             STEP 2 — Pricing & Stock
+        ════════════════════════════════════════ -->
+        <div class="form-card" data-step="2" data-state="locked" id="step-card-2">
+          <div class="form-card-header" onclick="handleHeaderClick(2)">
+            <div class="form-card-number" id="badge-2">2</div>
+            <div style="flex:1;min-width:0">
+              <div class="form-card-title">Pricing &amp; Stock</div>
+              <div class="form-card-subtitle" id="subtitle-2">FOB price, MOQ, and inventory levels</div>
+            </div>
+            <button class="btn btn-ghost btn-sm step-edit-btn" onclick="editStep(event,2)">Edit</button>
+          </div>
+          <div class="form-card-body">
+            <div class="form-row thirds">
+              <div class="form-group">
+                <label class="form-label">Unit Price (FOB) <span class="required">*</span></label>
+                <div style="position:relative">
+                  <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:0.85rem;color:var(--muted);font-family:var(--font-mono)">₦</span>
+                  <input type="number" class="form-control" id="fob-price" style="padding-left:28px" placeholder="0.00" oninput="updatePriceStrip()" />
+                </div>
+                <span class="form-hint">Naira per unit (FOB Lagos)</span>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Currency</label>
+                <select class="form-control">
+                  <option selected>NGN — Nigerian Naira</option>
+                  <option>USD — US Dollar</option>
+                  <option>GBP — British Pound</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Price Per <span class="required">*</span></label>
+                <select class="form-control">
+                  <option>Unit</option>
+                  <option>Carton (12 units)</option>
+                  <option>Carton (24 units)</option>
+                  <option>Pallet</option>
+                  <option>KG</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Minimum Order Qty <span class="required">*</span></label>
+                <input type="number" class="form-control" id="moq" placeholder="50" min="1" />
+                <span class="form-hint">Minimum units per order</span>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Bulk Discount Threshold</label>
+                <input type="number" class="form-control" placeholder="200" />
+                <span class="form-hint">Units to trigger bulk discount</span>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Bulk Discount %</label>
+                <div style="position:relative">
+                  <input type="number" class="form-control" style="padding-right:28px" placeholder="5" min="0" max="50" />
+                  <span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:0.85rem;color:var(--muted)">%</span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Stock on Hand <span class="required">*</span></label>
+                <input type="number" class="form-control" id="stock-on-hand" placeholder="500" min="0" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Low Stock Alert Threshold</label>
+                <input type="number" class="form-control" placeholder="50" />
+                <span class="form-hint">Alert when stock falls below this</span>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Restock Lead Time</label>
+                <div style="position:relative">
+                  <input type="number" class="form-control" style="padding-right:42px" placeholder="14" />
+                  <span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:0.78rem;color:var(--muted)">days</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="price-strip">
+              <div>
+                <div class="price-strip-label">FOB Price</div>
+                <div class="price-strip-val" id="strip-fob">₦ —</div>
+              </div>
+              <div class="price-strip-arrow">→</div>
+              <div>
+                <div class="price-strip-label">Est. Landed Cost</div>
+                <div class="price-strip-val" id="strip-landed">£ —</div>
+              </div>
+              <div class="price-strip-arrow">→</div>
+              <div>
+                <div class="price-strip-label">Est. Retail Price</div>
+                <div class="price-strip-val gold" id="strip-retail">£ —</div>
+              </div>
+            </div>
+            <div style="text-align:center;font-size:0.72rem;color:var(--muted);margin-top:var(--space-sm)">
+              Estimates based on current freight, duty, and VAT rates. Actual prices calculated at checkout.
+            </div>
+
+            <div class="step-actions">
+              <button class="btn btn-ghost" onclick="goToStep(1)">← Back</button>
+              <button class="btn btn-primary" onclick="nextStep(2)">Continue: Import Details →</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════
+             STEP 3 — Import & Logistics
+        ════════════════════════════════════════ -->
+        <div class="form-card" data-step="3" data-state="locked" id="step-card-3">
+          <div class="form-card-header" onclick="handleHeaderClick(3)">
+            <div class="form-card-number" id="badge-3">3</div>
+            <div style="flex:1;min-width:0">
+              <div class="form-card-title">Import &amp; Logistics Details</div>
+              <div class="form-card-subtitle" id="subtitle-3">Required for UK customs clearance and HMRC documentation</div>
+            </div>
+            <button class="btn btn-ghost btn-sm step-edit-btn" onclick="editStep(event,3)">Edit</button>
+          </div>
+          <div class="form-card-body">
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">HS Code (UK Tariff) <span class="required">*</span></label>
+                <input type="text" class="form-control" id="hs-code" placeholder="2103.90.90" style="font-family:var(--font-mono)" />
+                <div class="hs-helper">
+                  ℹ️ Not sure? Use the <a href="https://www.trade-tariff.service.gov.uk" target="_blank" style="color:var(--green-mid)">UK Trade Tariff</a> to look up the correct code for your product.
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Country of Origin <span class="required">*</span></label>
+                <select class="form-control" id="coo">
+                  <option value="">Select…</option>
+                  <option selected>Nigeria</option>
+                  <option>Ghana</option>
+                  <option>Kenya</option>
+                  <option>South Africa</option>
+                  <option>Ethiopia</option>
+                  <option>Senegal</option>
+                  <option>Ivory Coast</option>
+                  <option>Cameroon</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Import Duty Rate</label>
+                <div style="position:relative">
+                  <input type="number" class="form-control" style="padding-right:28px;background:var(--cream)" value="0" readonly />
+                  <span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:0.85rem;color:var(--muted)">%</span>
+                </div>
+                <span class="form-hint">Auto-populated from HS code</span>
+              </div>
+              <div class="form-group">
+                <label class="form-label">DCTS Eligible?</label>
+                <select class="form-control">
+                  <option>Yes — Eligible for DCTS tariff preference</option>
+                  <option>No — Standard MFN rate applies</option>
+                  <option>Unknown / Check with GUZE</option>
+                </select>
+                <span class="form-hint">Developing Countries Trading Scheme reduces or eliminates UK import duty for eligible products</span>
+              </div>
+              <div class="form-group full">
+                <label class="form-label">Product Dimensions</label>
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:var(--space-md)">
+                  <input type="number" class="form-control" placeholder="L (cm)" />
+                  <input type="number" class="form-control" placeholder="W (cm)" />
+                  <input type="number" class="form-control" placeholder="H (cm)" />
+                  <input type="number" class="form-control" placeholder="Weight (kg)" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Units Per Carton</label>
+                <input type="number" class="form-control" placeholder="12" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Carton Weight (kg)</label>
+                <input type="number" class="form-control" placeholder="5.5" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Shelf Life</label>
+                <div style="position:relative">
+                  <input type="number" class="form-control" style="padding-right:52px" placeholder="24" />
+                  <span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:0.78rem;color:var(--muted)">months</span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Storage Requirements</label>
+                <select class="form-control">
+                  <option>Ambient (Room Temperature)</option>
+                  <option>Refrigerated (4°C)</option>
+                  <option>Frozen (-18°C)</option>
+                  <option>Cool &amp; Dry</option>
+                </select>
+              </div>
+              <div class="form-group full">
+                <label class="form-label">Special Handling / Regulatory Notes</label>
+                <textarea class="form-control" rows="2" placeholder="e.g. Contains allergens (nuts), requires FSAI notification, controlled substance declaration…"></textarea>
+              </div>
+            </div>
+
+            <div class="step-actions">
+              <button class="btn btn-ghost" onclick="goToStep(2)">← Back</button>
+              <button class="btn btn-primary" onclick="nextStep(3)">Continue: Compliance →</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════
+             STEP 4 — Compliance & Visibility
+        ════════════════════════════════════════ -->
+        <div class="form-card" data-step="4" data-state="locked" id="step-card-4">
+          <div class="form-card-header" onclick="handleHeaderClick(4)">
+            <div class="form-card-number" id="badge-4">4</div>
+            <div style="flex:1;min-width:0">
+              <div class="form-card-title">Compliance &amp; Visibility</div>
+              <div class="form-card-subtitle" id="subtitle-4">Attach required certificates and set listing visibility</div>
+            </div>
+            <button class="btn btn-ghost btn-sm step-edit-btn" onclick="editStep(event,4)">Edit</button>
+          </div>
+          <div class="form-card-body">
+            <div style="font-size:0.78rem;color:var(--muted);margin-bottom:var(--space-lg)">
+              Select from your uploaded documents, or <a href="supplier-compliance.html" style="color:var(--green-mid)">upload new ones</a>.
+            </div>
+
+            <div style="font-size:0.72rem;font-family:var(--font-mono);font-weight:700;text-transform:uppercase;color:var(--muted);letter-spacing:0.08em;margin-bottom:var(--space-sm)">Required for food products</div>
+            <div class="doc-attach-list">
+              <label class="doc-attach-item selected">
+                <input type="checkbox" checked />
+                <div class="doc-attach-meta">
+                  <div class="doc-attach-name">FSA Certificate — Jollof Mix</div>
+                  <div class="doc-attach-type"><span class="compliance-badge fsa" style="font-size:0.62rem;padding:1px 6px">FSA</span> · Expires Nov 2026</div>
+                </div>
+              </label>
+              <label class="doc-attach-item">
+                <input type="checkbox" />
+                <div class="doc-attach-meta">
+                  <div class="doc-attach-name">Product Safety Conformity</div>
+                  <div class="doc-attach-type"><span class="compliance-badge opss" style="font-size:0.62rem;padding:1px 6px">OPSS</span> · Expires Aug 2026</div>
+                </div>
+              </label>
+            </div>
+
+            <div style="font-size:0.72rem;font-family:var(--font-mono);font-weight:700;text-transform:uppercase;color:var(--muted);letter-spacing:0.08em;margin-top:var(--space-xl);margin-bottom:var(--space-sm)">Optional</div>
+            <div class="doc-attach-list">
+              <label class="doc-attach-item">
+                <input type="checkbox" />
+                <div class="doc-attach-meta">
+                  <div class="doc-attach-name">DCTS Tariff Certificate</div>
+                  <div class="doc-attach-type"><span class="compliance-badge dcts" style="font-size:0.62rem;padding:1px 6px">DCTS</span> · Expires Jan 2027</div>
+                </div>
+              </label>
+              <label class="doc-attach-item">
+                <input type="checkbox" />
+                <div class="doc-attach-meta">
+                  <div class="doc-attach-name">UK Responsible Person Declaration</div>
+                  <div class="doc-attach-type"><span style="background:rgba(142,68,173,0.1);color:#8e44ad;border:1px solid rgba(142,68,173,0.3);font-size:0.62rem;padding:1px 6px;border-radius:4px;font-family:var(--font-mono);font-weight:700">UKRP</span> · Expires Mar 2027</div>
+                </div>
+              </label>
+            </div>
+
+            <div style="margin-top:var(--space-lg);padding:var(--space-md);background:rgba(212,164,55,0.08);border:1.5px solid rgba(212,164,55,0.25);border-radius:var(--radius-md)">
+              <div style="font-size:0.76rem;color:#a0761a;font-weight:600;margin-bottom:3px">⚠️ Compliance Review</div>
+              <div style="font-size:0.74rem;color:var(--ink-mid)">Products are activated on the catalogue only after compliance documents are verified by the GUZE team.</div>
+            </div>
+
+            <!-- Visibility sub-section -->
+            <div class="step-section">
+              <div class="step-section-title">Visibility</div>
+              <div class="step-section-subtitle">Choose who can see this product on the catalogue</div>
+              <label class="visibility-option checked">
+                <input type="radio" name="visibility" value="all" checked />
+                <div>
+                  <div style="font-size:0.85rem;font-weight:600;color:var(--ink-mid)">All Retailers</div>
+                  <div style="font-size:0.74rem;color:var(--muted)">Visible to all approved UK retailers</div>
+                </div>
+              </label>
+              <label class="visibility-option">
+                <input type="radio" name="visibility" value="approved" />
+                <div>
+                  <div style="font-size:0.85rem;font-weight:600;color:var(--ink-mid)">Preferred Retailers</div>
+                  <div style="font-size:0.74rem;color:var(--muted)">Only retailers you've approved</div>
+                </div>
+              </label>
+              <label class="visibility-option">
+                <input type="radio" name="visibility" value="draft" />
+                <div>
+                  <div style="font-size:0.85rem;font-weight:600;color:var(--ink-mid)">Draft / Private</div>
+                  <div style="font-size:0.74rem;color:var(--muted)">Not visible until you publish</div>
+                </div>
+              </label>
+            </div>
+
+            <div class="step-actions">
+              <button class="btn btn-ghost" onclick="goToStep(3)">← Back</button>
+              <button class="btn btn-primary" onclick="nextStep(4)">Continue: Review &amp; Publish →</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════
+             STEP 5 — Review & Publish
+        ════════════════════════════════════════ -->
+        <div class="form-card" data-step="5" data-state="locked" id="step-card-5">
+          <div class="form-card-header" onclick="handleHeaderClick(5)">
+            <div class="form-card-number" id="badge-5">5</div>
+            <div style="flex:1;min-width:0">
+              <div class="form-card-title">Review &amp; Publish</div>
+              <div class="form-card-subtitle" id="subtitle-5">Check your details before submitting for compliance review</div>
+            </div>
+          </div>
+          <div class="form-card-body">
+
+            <div class="review-summary" id="review-grid">
+              <!-- Populated by buildReviewSummary() -->
+            </div>
+
+            <div class="publish-action">
+              <div class="publish-action-title">Ready to list?</div>
+              <div class="publish-action-hint">Your product will be submitted for compliance review before going live on the GUZE catalogue. Expect 1–2 working days.</div>
+              <div style="display:flex;flex-direction:column;gap:var(--space-sm);align-items:center">
+                <button class="btn btn-white" style="width:100%;max-width:300px" onclick="submitProduct()">Submit for Review →</button>
+                <button class="btn btn-white-outline" style="width:100%;max-width:300px">Save as Draft</button>
+              </div>
+            </div>
+
+            <div style="margin-top:var(--space-lg)">
+              <button class="btn btn-ghost" onclick="goToStep(4)">← Back to Compliance</button>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /steps-container -->
+    </div><!-- /page-body -->
+  </div><!-- /main-content -->
+</div><!-- /app-layout -->
+
+<script>
+  // ── State ─────────────────────────────────────────────────────────────────
+  const completed = new Set();
+  let currentStep = 1;
+
+  // ── Navigation ────────────────────────────────────────────────────────────
+  function handleHeaderClick(step) {
+    if (completed.has(step)) goToStep(step);
+  }
+
+  function editStep(event, step) {
+    event.stopPropagation();
+    goToStep(step);
+  }
+
+  function goToStep(step) {
+    if (step !== currentStep && !completed.has(step)) return;
+    currentStep = step;
+
+    for (let i = 1; i <= 5; i++) {
+      const card = document.getElementById('step-card-' + i);
+      const prog = document.getElementById('progress-' + i);
+      if (i === step) {
+        card.dataset.state = 'active';
+        prog.className = 'step-item active';
+      } else if (completed.has(i)) {
+        card.dataset.state = 'done';
+        prog.className = 'step-item done';
+      } else {
+        card.dataset.state = 'locked';
+        prog.className = 'step-item';
+      }
+    }
+
+    document.getElementById('step-card-' + step)
+      .scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  // ── Validation & next ─────────────────────────────────────────────────────
+  function nextStep(step) {
+    // Clear previous errors on this card
+    document.querySelectorAll('#step-card-' + step + ' .validation-msg')
+      .forEach(el => el.remove());
+    document.querySelectorAll('#step-card-' + step + ' .form-control.error')
+      .forEach(el => el.classList.remove('error'));
+
+    if (!validateStep(step)) return;
+
+    completed.add(step);
+    updateBadgeAndSummary(step);
+
+    if (step < 5) {
+      goToStep(step + 1);
+      if (step + 1 === 5) buildReviewSummary();
+    }
+  }
+
+  function validateStep(step) {
+    const errors = [];
+
+    if (step === 1) {
+      const name = document.getElementById('product-name');
+      const cat  = document.getElementById('product-category');
+      const desc = document.getElementById('product-desc');
+      if (!name.value.trim()) errors.push(name);
+      if (!cat.value) errors.push(cat);
+      if (desc.value.trim().length < 50) errors.push(desc);
+    } else if (step === 2) {
+      const fob   = document.getElementById('fob-price');
+      const moq   = document.getElementById('moq');
+      const stock = document.getElementById('stock-on-hand');
+      if (!fob.value || parseFloat(fob.value) <= 0) errors.push(fob);
+      if (!moq.value || parseInt(moq.value) < 1) errors.push(moq);
+      if (stock.value === '' || parseInt(stock.value) < 0) errors.push(stock);
+    } else if (step === 3) {
+      const hs  = document.getElementById('hs-code');
+      const coo = document.getElementById('coo');
+      if (!hs.value.trim()) errors.push(hs);
+      if (!coo.value) errors.push(coo);
+    }
+
+    if (errors.length) {
+      errors.forEach(el => {
+        el.classList.add('error');
+        ['input', 'change'].forEach(ev =>
+          el.addEventListener(ev, () => el.classList.remove('error'), { once: true })
+        );
+      });
+      const actionsEl = document.querySelector('#step-card-' + step + ' .step-actions');
+      const msg = document.createElement('div');
+      msg.className = 'validation-msg';
+      msg.textContent = 'Please complete all required fields before continuing.';
+      actionsEl.insertAdjacentElement('beforebegin', msg);
+      errors[0].focus();
+      return false;
+    }
+    return true;
+  }
+
+  // ── Badge & subtitle update on completion ──────────────────────────────────
+  function updateBadgeAndSummary(step) {
+    document.getElementById('badge-' + step).textContent = '✓';
+
+    const subtitleEl = document.getElementById('subtitle-' + step);
+    let summary = '';
+
+    if (step === 1) {
+      const name = document.getElementById('product-name').value.trim();
+      const cat  = document.getElementById('product-category');
+      summary = name + ' · ' + cat.options[cat.selectedIndex].text;
+    } else if (step === 2) {
+      const fob = parseFloat(document.getElementById('fob-price').value);
+      const moq = document.getElementById('moq').value;
+      summary = '₦' + fob.toLocaleString('en-NG') + ' / unit · MOQ ' + moq;
+    } else if (step === 3) {
+      const hs  = document.getElementById('hs-code').value;
+      const coo = document.getElementById('coo');
+      summary = 'HS ' + hs + ' · Origin: ' + coo.options[coo.selectedIndex].text;
+    } else if (step === 4) {
+      const n = document.querySelectorAll('#step-card-4 input[type=checkbox]:checked').length;
+      summary = n + ' document' + (n !== 1 ? 's' : '') + ' attached';
+    }
+
+    if (summary) subtitleEl.textContent = summary;
+  }
+
+  // ── Review summary builder ────────────────────────────────────────────────
+  function buildReviewSummary() {
+    const val    = id => (document.getElementById(id) || {}).value || '—';
+    const selTxt = id => {
+      const el = document.getElementById(id);
+      return el ? el.options[el.selectedIndex].text : '—';
+    };
+
+    const blocks = [
+      {
+        label: 'Product Info', editStep: 1,
+        lines: [
+          '<strong>' + (val('product-name') || '—') + '</strong>',
+          selTxt('product-category'),
+        ]
+      },
+      {
+        label: 'Pricing & Stock', editStep: 2,
+        lines: [
+          'FOB: ₦' + (parseFloat(val('fob-price')) || 0).toLocaleString('en-NG'),
+          'MOQ: ' + val('moq') + ' units',
+          'Stock: ' + val('stock-on-hand') + ' units',
+        ]
+      },
+      {
+        label: 'Import Details', editStep: 3,
+        lines: [
+          'HS Code: ' + val('hs-code'),
+          'Origin: ' + selTxt('coo'),
+        ]
+      },
+      {
+        label: 'Compliance', editStep: 4,
+        lines: [
+          document.querySelectorAll('#step-card-4 input[type=checkbox]:checked').length + ' document(s) attached',
+          'Visibility: ' + (document.querySelector('input[name=visibility]:checked') || {value: 'all'}).value,
+        ]
+      },
+    ];
+
+    document.getElementById('review-grid').innerHTML = blocks.map(b => `
+      <div class="review-block">
+        <div class="review-block-label">
+          ${b.label}
+          <a class="review-block-edit" onclick="goToStep(${b.editStep})">Edit</a>
+        </div>
+        <div class="review-block-content">${b.lines.join('<br>')}</div>
+      </div>
+    `).join('');
+  }
+
+  // ── Price strip ───────────────────────────────────────────────────────────
+  function updatePriceStrip() {
+    const fob = parseFloat(document.getElementById('fob-price').value) || 0;
+    if (!fob) {
+      document.getElementById('strip-fob').textContent    = '₦ —';
+      document.getElementById('strip-landed').textContent = '£ —';
+      document.getElementById('strip-retail').textContent = '£ —';
+      return;
+    }
+    const fobGBP    = fob * 0.00052;
+    const landedGBP = fobGBP * 1.45;
+    const retailGBP = landedGBP * 1.65;
+    document.getElementById('strip-fob').textContent    = '₦ ' + fob.toLocaleString('en-NG', {minimumFractionDigits:2, maximumFractionDigits:2});
+    document.getElementById('strip-landed').textContent = '£ ' + landedGBP.toFixed(2);
+    document.getElementById('strip-retail').textContent = '£ ' + retailGBP.toFixed(2);
+  }
+
+  // ── Tags ──────────────────────────────────────────────────────────────────
+  function removeTag(btn) { btn.closest('.tag-pill').remove(); }
+  function handleTagInput(e, input) {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault();
+      const val = input.value.trim().replace(/,$/, '');
+      if (!val) return;
+      const pill = document.createElement('div');
+      pill.className = 'tag-pill';
+      pill.innerHTML = val + '<span class="tag-remove" onclick="removeTag(this)">×</span>';
+      input.parentNode.insertBefore(pill, input);
+      input.value = '';
+    }
+  }
+
+  // ── Progress bar click handlers ───────────────────────────────────────────
+  document.querySelectorAll('.step-item').forEach((item, i) => {
+    item.addEventListener('click', () => {
+      const step = i + 1;
+      if (completed.has(step) || step === currentStep) goToStep(step);
+    });
+  });
+
+  // ── Visibility radio styling ──────────────────────────────────────────────
+  document.querySelectorAll('input[name=visibility]').forEach(radio => {
+    radio.addEventListener('change', () => {
+      document.querySelectorAll('.visibility-option').forEach(opt => opt.classList.remove('checked'));
+      if (radio.checked) radio.closest('.visibility-option').classList.add('checked');
+    });
+  });
+
+  // ── Doc attach checkbox styling ───────────────────────────────────────────
+  document.querySelectorAll('.doc-attach-item input[type=checkbox]').forEach(cb => {
+    cb.addEventListener('change', () => {
+      cb.closest('.doc-attach-item').classList.toggle('selected', cb.checked);
+    });
+  });
+
+  // ── Submit ────────────────────────────────────────────────────────────────
+  function triggerImageUpload(idx) {
+    alert('Image upload slot ' + (idx + 1) + ' — wire to POST /api/v1/Products (multipart form data)');
+  }
+
+  function submitProduct() {
+    alert('Product submitted for compliance review. You\'ll receive a notification when it goes live.');
+  }
+</script>
+</body>
+</html>

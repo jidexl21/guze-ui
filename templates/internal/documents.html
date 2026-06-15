@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Documents — GUZE</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../shared-styles.css" />
+  <style>
+    /* ── Document cards ── */
+    .doc-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: var(--space-lg);
+      margin-bottom: var(--space-xl);
+    }
+
+    .doc-card {
+      background: var(--white);
+      border: 1.5px solid var(--cream-dark);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      transition: box-shadow var(--transition), border-color var(--transition);
+      cursor: pointer;
+    }
+
+    .doc-card:hover {
+      box-shadow: var(--shadow-md);
+      border-color: var(--green-bright);
+    }
+
+    .doc-card.expired { border-color: rgba(192,57,43,0.4); }
+    .doc-card.expiring-soon { border-color: var(--amber); }
+
+    .doc-card-top {
+      padding: var(--space-lg);
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: var(--space-md);
+    }
+
+    .doc-icon-wrap {
+      width: 48px; height: 48px;
+      border-radius: var(--radius-md);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem;
+      flex-shrink: 0;
+    }
+
+    .doc-icon-wrap.fsa { background: rgba(41,128,185,0.1); }
+    .doc-icon-wrap.opss { background: rgba(34,168,107,0.1); }
+    .doc-icon-wrap.dcts { background: rgba(212,164,55,0.1); }
+    .doc-icon-wrap.ukrp { background: rgba(142,68,173,0.1); }
+
+    .doc-meta { flex: 1; }
+    .doc-type-label {
+      font-size: 0.7rem;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 4px;
+    }
+    .doc-type-label.fsa { color: var(--blue-info); }
+    .doc-type-label.opss { color: var(--green-mid); }
+    .doc-type-label.dcts { color: var(--gold); }
+    .doc-type-label.ukrp { color: #8e44ad; }
+
+    .doc-name {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--ink-mid);
+      margin-bottom: 4px;
+      line-height: 1.3;
+    }
+
+    .doc-supplier {
+      font-size: 0.76rem;
+      color: var(--muted);
+    }
+
+    .doc-card-bottom {
+      padding: var(--space-md) var(--space-lg);
+      border-top: 1px solid var(--cream);
+      background: var(--cream);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .doc-expiry {
+      font-size: 0.76rem;
+      color: var(--muted);
+      font-family: var(--font-mono);
+    }
+    .doc-expiry.expired { color: var(--red-alert); font-weight: 600; }
+    .doc-expiry.expiring { color: var(--amber); font-weight: 600; }
+
+    .doc-actions { display: flex; gap: 6px; }
+
+    /* ── Upload modal ── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: var(--white);
+      border-radius: var(--radius-xl);
+      width: 520px;
+      max-width: 95vw;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    }
+
+    .modal-header {
+      padding: var(--space-xl);
+      border-bottom: 1px solid var(--cream-dark);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .modal-title {
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--green-deep);
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 1.3rem;
+      cursor: pointer;
+      color: var(--muted);
+      line-height: 1;
+    }
+
+    .modal-body { padding: var(--space-xl); }
+
+    .modal-footer {
+      padding: var(--space-lg) var(--space-xl);
+      border-top: 1px solid var(--cream-dark);
+      display: flex;
+      justify-content: flex-end;
+      gap: var(--space-sm);
+    }
+
+    /* ── Upload drop zone ── */
+    .upload-zone {
+      border: 2px dashed var(--cream-dark);
+      border-radius: var(--radius-lg);
+      padding: var(--space-xl) var(--space-lg);
+      text-align: center;
+      cursor: pointer;
+      transition: all var(--transition);
+      margin-bottom: var(--space-lg);
+    }
+
+    .upload-zone:hover,
+    .upload-zone.drag-over {
+      border-color: var(--green-bright);
+      background: rgba(34,168,107,0.04);
+    }
+
+    .upload-zone-icon { font-size: 2.5rem; margin-bottom: var(--space-sm); }
+    .upload-zone-title { font-size: 0.92rem; font-weight: 600; color: var(--ink-mid); margin-bottom: 4px; }
+    .upload-zone-hint { font-size: 0.78rem; color: var(--muted); }
+
+    /* ── Form ── */
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-md);
+      margin-bottom: var(--space-md);
+    }
+
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group.full { grid-column: 1 / -1; }
+
+    .form-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--ink-mid);
+    }
+
+    .form-control {
+      padding: 10px 14px;
+      border: 1.5px solid var(--cream-dark);
+      border-radius: var(--radius-md);
+      font-family: var(--font-body);
+      font-size: 0.88rem;
+      color: var(--ink);
+      background: var(--white);
+      transition: border-color var(--transition);
+      outline: none;
+    }
+
+    .form-control:focus { border-color: var(--green-bright); box-shadow: 0 0 0 3px rgba(34,168,107,0.12); }
+
+    /* ── Filter bar ── */
+    .filter-bar {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      flex-wrap: wrap;
+      margin-bottom: var(--space-xl);
+    }
+
+    .filter-bar .search-input {
+      flex: 1;
+      min-width: 200px;
+      padding: 9px 14px 9px 36px;
+      border: 1.5px solid var(--cream-dark);
+      border-radius: var(--radius-full);
+      font-size: 0.85rem;
+      font-family: var(--font-body);
+      outline: none;
+      background: var(--white);
+      background-image: url("data:image/svg+xml,%3Csvg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23a0a0a0' stroke-width='2' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: 12px center;
+      transition: border-color var(--transition);
+    }
+
+    .filter-bar .search-input:focus { border-color: var(--green-bright); }
+
+    .filter-chip {
+      padding: 7px 14px;
+      border-radius: var(--radius-full);
+      border: 1.5px solid var(--cream-dark);
+      background: var(--white);
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--ink-mid);
+      cursor: pointer;
+      transition: all var(--transition);
+      white-space: nowrap;
+    }
+
+    .filter-chip:hover { border-color: var(--green-bright); color: var(--green-deep); }
+    .filter-chip.active { background: var(--green-deep); color: var(--white); border-color: var(--green-deep); }
+
+    /* ── Stats strip ── */
+    .stats-strip {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--space-md);
+      margin-bottom: var(--space-xl);
+    }
+
+    .stat-mini {
+      background: var(--white);
+      border: 1px solid var(--cream-dark);
+      border-radius: var(--radius-lg);
+      padding: var(--space-lg);
+      text-align: center;
+    }
+
+    .stat-mini-val {
+      font-family: var(--font-display);
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--green-deep);
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .stat-mini-val.amber { color: var(--amber); }
+    .stat-mini-val.red { color: var(--red-alert); }
+
+    .stat-mini-label { font-size: 0.76rem; color: var(--muted); }
+
+    /* ── Empty state ── */
+    .empty-state {
+      text-align: center;
+      padding: var(--space-xl) var(--space-lg);
+      color: var(--muted);
+    }
+
+    .empty-state-icon { font-size: 3rem; margin-bottom: var(--space-md); }
+    .empty-state-title { font-size: 1rem; font-weight: 600; color: var(--ink-mid); margin-bottom: var(--space-sm); }
+    .empty-state-text { font-size: 0.85rem; margin-bottom: var(--space-lg); }
+
+    /* ── Status badge override for doc statuses ── */
+    .badge-amber { background: rgba(212,164,55,0.12); color: #a0761a; border: 1px solid rgba(212,164,55,0.3); }
+
+    @media (max-width: 768px) {
+      .doc-grid { grid-template-columns: 1fr; }
+      .stats-strip { grid-template-columns: repeat(2, 1fr); }
+      .filter-bar { flex-direction: column; align-items: stretch; }
+    }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <a href="../index.html" style="font-family:var(--font-display);font-size:1.1rem;font-weight:700;color:white;text-decoration:none;display:flex;align-items:center;gap:8px;">
+        <span>🇳🇬→🇬🇧</span> GUZE
+      </a>
+    </div>
+    <div class="sidebar-nav">
+      <div class="sidebar-section-label">Retailer Portal</div>
+      <a href="dashboard.html" class="sidebar-link"><span class="icon">📊</span> Dashboard</a>
+      <a href="catalogue.html" class="sidebar-link"><span class="icon">🛍️</span> Product Catalogue</a>
+      <a href="calculator.html" class="sidebar-link"><span class="icon">🧮</span> Landed Cost Calculator</a>
+      <a href="aggregation.html" class="sidebar-link"><span class="icon">📦</span> Container Tracker</a>
+      <div class="sidebar-section-label">Account</div>
+      <a href="settings.html" class="sidebar-link"><span class="icon">⚙️</span> Settings</a>
+      <a href="documents.html" class="sidebar-link active"><span class="icon">📄</span> My Documents</a>
+      <a href="#" class="sidebar-link"><span class="icon">💬</span> Support</a>
+    </div>
+    <div class="sidebar-footer">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <div style="width:34px;height:34px;border-radius:50%;background:var(--green-mid);display:flex;align-items:center;justify-content:center;font-size:0.82rem;color:white;font-weight:700;flex-shrink:0">JD</div>
+        <div>
+          <div style="font-size:0.82rem;color:white;font-weight:600">Jane Doe</div>
+          <div style="font-size:0.7rem;color:rgba(255,255,255,0.4)">UK Retailer · Growth</div>
+        </div>
+      </div>
+      <a href="../index.html" class="sidebar-link" style="font-size:0.8rem;padding:6px 16px"><span class="icon">↩️</span> Sign Out</a>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <div class="main-content">
+    <div class="page-header">
+      <div>
+        <div class="page-title">My Documents</div>
+        <div class="page-subtitle">Compliance certificates, import licences, and product documentation</div>
+      </div>
+      <button class="btn btn-primary" onclick="openUploadModal()">
+        + Upload Document
+      </button>
+    </div>
+
+    <div class="page-body">
+
+      <!-- Stats -->
+      <div class="stats-strip">
+        <div class="stat-mini">
+          <div class="stat-mini-val">12</div>
+          <div class="stat-mini-label">Total Documents</div>
+        </div>
+        <div class="stat-mini">
+          <div class="stat-mini-val">9</div>
+          <div class="stat-mini-label">Approved</div>
+        </div>
+        <div class="stat-mini">
+          <div class="stat-mini-val amber">2</div>
+          <div class="stat-mini-label">Expiring Soon</div>
+        </div>
+        <div class="stat-mini">
+          <div class="stat-mini-val red">1</div>
+          <div class="stat-mini-label">Action Required</div>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="filter-bar">
+        <input type="text" class="search-input" placeholder="Search documents…" />
+        <button class="filter-chip active" onclick="setFilter(this,'all')">All</button>
+        <button class="filter-chip" onclick="setFilter(this,'fsa')">FSA</button>
+        <button class="filter-chip" onclick="setFilter(this,'opss')">OPSS</button>
+        <button class="filter-chip" onclick="setFilter(this,'dcts')">DCTS</button>
+        <button class="filter-chip" onclick="setFilter(this,'ukrp')">UKRP</button>
+        <button class="filter-chip" onclick="setFilter(this,'pending')">Pending Review</button>
+        <button class="filter-chip" onclick="setFilter(this,'expiring')">Expiring Soon</button>
+      </div>
+
+      <!-- Document grid -->
+      <div class="doc-grid" id="doc-grid">
+
+        <!-- FSA — Approved -->
+        <div class="doc-card">
+          <div class="doc-card-top">
+            <div class="doc-icon-wrap fsa">📋</div>
+            <div class="doc-meta">
+              <div class="doc-type-label fsa">FSA</div>
+              <div class="doc-name">Food Standards Certificate — Jollof Mix</div>
+              <div class="doc-supplier">Lagos Foods Ltd</div>
+            </div>
+            <span class="badge badge-green">Approved</span>
+          </div>
+          <div class="doc-card-bottom">
+            <span class="doc-expiry">Expires 30 Nov 2026</span>
+            <div class="doc-actions">
+              <button class="btn btn-ghost btn-sm" title="View">👁</button>
+              <button class="btn btn-ghost btn-sm" title="Download">⬇</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- OPSS — Approved -->
+        <div class="doc-card">
+          <div class="doc-card-top">
+            <div class="doc-icon-wrap opss">🛡️</div>
+            <div class="doc-meta">
+              <div class="doc-type-label opss">OPSS</div>
+              <div class="doc-name">Product Safety Conformity — Shea Butter 500g</div>
+              <div class="doc-supplier">Abuja Naturals</div>
+            </div>
+            <span class="badge badge-green">Approved</span>
+          </div>
+          <div class="doc-card-bottom">
+            <span class="doc-expiry">Expires 15 Aug 2026</span>
+            <div class="doc-actions">
+              <button class="btn btn-ghost btn-sm" title="View">👁</button>
+              <button class="btn btn-ghost btn-sm" title="Download">⬇</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- DCTS — Expiring soon -->
+        <div class="doc-card expiring-soon">
+          <div class="doc-card-top">
+            <div class="doc-icon-wrap dcts">🌍</div>
+            <div class="doc-meta">
+              <div class="doc-type-label dcts">DCTS</div>
+              <div class="doc-name">Developing Countries Tariff Certificate</div>
+              <div class="doc-supplier">Kano Grains Export Co.</div>
+            </div>
+            <span class="badge badge-amber">Expiring Soon</span>
+          </div>
+          <div class="doc-card-bottom">
+            <span class="doc-expiry expiring">⚠️ Expires 28 Jun 2026</span>
+            <div class="doc-actions">
+              <button class="btn btn-ghost btn-sm" title="View">👁</button>
+              <button class="btn btn-primary btn-sm" onclick="openUploadModal()">Renew</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- UKRP — Approved -->
+        <div class="doc-card">
+          <div class="doc-card-top">
+            <div class="doc-icon-wrap ukrp">🇬🇧</div>
+            <div class="doc-meta">
+              <div class="doc-type-label ukrp">UKRP</div>
+              <div class="doc-name">UK Responsible Person Declaration</div>
+              <div class="doc-supplier">Abuja Naturals</div>
+            </div>
+            <span class="badge badge-green">Approved</span>
+          </div>
+          <div class="doc-card-bottom">
+            <span class="doc-expiry">Expires 01 Mar 2027</span>
+            <div class="doc-actions">
+              <button class="btn btn-ghost btn-sm" title="View">👁</button>
+              <button class="btn btn-ghost btn-sm" title="Download">⬇</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- FSA — Pending -->
+        <div class="doc-card">
+          <div class="doc-card-top">
+            <div class="doc-icon-wrap fsa">📋</div>
+            <div class="doc-meta">
+              <div class="doc-type-label fsa">FSA</div>
+              <div class="doc-name">Food Standards Certificate — Egusi Seeds</div>
+              <div class="doc-supplier">Lagos Foods Ltd</div>
+            </div>
+            <span class="badge badge-gold">Pending Review</span>
+          </div>
+          <div class="doc-card-bottom">
+            <span class="doc-expiry">Uploaded 04 Jun 2026</span>
+            <div class="doc-actions">
+              <button class="btn btn-ghost btn-sm" title="View">👁</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- OPSS — Rejected -->
+        <div class="doc-card expired">
+          <div class="doc-card-top">
+            <div class="doc-icon-wrap opss">🛡️</div>
+            <div class="doc-meta">
+              <div class="doc-type-label opss">OPSS</div>
+              <div class="doc-name">Product Safety Conformity — Ogiri Seasoning</div>
+              <div class="doc-supplier">East Delta Spices</div>
+            </div>
+            <span class="badge badge-red">Rejected</span>
+          </div>
+          <div class="doc-card-bottom">
+            <span class="doc-expiry expired">Re-upload required</span>
+            <div class="doc-actions">
+              <button class="btn btn-ghost btn-sm" title="View reason">👁</button>
+              <button class="btn btn-primary btn-sm" onclick="openUploadModal()">Re-upload</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- DCTS — Approved -->
+        <div class="doc-card">
+          <div class="doc-card-top">
+            <div class="doc-icon-wrap dcts">🌍</div>
+            <div class="doc-meta">
+              <div class="doc-type-label dcts">DCTS</div>
+              <div class="doc-name">Developing Countries Tariff Certificate — Plantain Flour</div>
+              <div class="doc-supplier">Lagos Foods Ltd</div>
+            </div>
+            <span class="badge badge-green">Approved</span>
+          </div>
+          <div class="doc-card-bottom">
+            <span class="doc-expiry">Expires 12 Jan 2027</span>
+            <div class="doc-actions">
+              <button class="btn btn-ghost btn-sm" title="View">👁</button>
+              <button class="btn btn-ghost btn-sm" title="Download">⬇</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- FSA — Approved -->
+        <div class="doc-card">
+          <div class="doc-card-top">
+            <div class="doc-icon-wrap fsa">📋</div>
+            <div class="doc-meta">
+              <div class="doc-type-label fsa">FSA</div>
+              <div class="doc-name">Food Standards Certificate — Suya Spice Blend</div>
+              <div class="doc-supplier">Kano Grains Export Co.</div>
+            </div>
+            <span class="badge badge-green">Approved</span>
+          </div>
+          <div class="doc-card-bottom">
+            <span class="doc-expiry">Expires 22 Sep 2026</span>
+            <div class="doc-actions">
+              <button class="btn btn-ghost btn-sm" title="View">👁</button>
+              <button class="btn btn-ghost btn-sm" title="Download">⬇</button>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /doc-grid -->
+
+      <!-- Table view toggle -->
+      <div class="card" style="padding:0;overflow:hidden;display:none" id="table-view">
+        <div style="padding:var(--space-md) var(--space-xl);border-bottom:1px solid var(--cream-dark);display:flex;align-items:center;justify-content:space-between">
+          <span style="font-size:0.85rem;font-weight:600;color:var(--ink-mid)">All Documents</span>
+          <span style="font-size:0.78rem;color:var(--muted)">12 total</span>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Document</th>
+              <th>Type</th>
+              <th>Supplier</th>
+              <th>Uploaded</th>
+              <th>Expiry</th>
+              <th>Status</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="font-weight:500">Food Standards Certificate — Jollof Mix</td>
+              <td><span class="compliance-badge fsa">FSA</span></td>
+              <td>Lagos Foods Ltd</td>
+              <td style="font-family:var(--font-mono);font-size:0.8rem">01 Jan 2026</td>
+              <td style="font-family:var(--font-mono);font-size:0.8rem">30 Nov 2026</td>
+              <td><span class="badge badge-green">Approved</span></td>
+              <td><button class="btn btn-ghost btn-sm">View</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div><!-- /page-body -->
+  </div><!-- /main-content -->
+</div><!-- /app-layout -->
+
+<!-- ── UPLOAD MODAL ── -->
+<div class="modal-overlay" id="upload-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Upload Compliance Document</div>
+      <button class="modal-close" onclick="closeUploadModal()">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- Drop zone -->
+      <div class="upload-zone" id="drop-zone"
+           ondragover="event.preventDefault();this.classList.add('drag-over')"
+           ondragleave="this.classList.remove('drag-over')"
+           ondrop="handleDrop(event)"
+           onclick="document.getElementById('file-input').click()">
+        <div class="upload-zone-icon">📁</div>
+        <div class="upload-zone-title">Drop your file here, or click to browse</div>
+        <div class="upload-zone-hint">Accepted formats: PDF, PNG, JPG · Max 10 MB</div>
+        <input type="file" id="file-input" style="display:none" accept=".pdf,.png,.jpg,.jpeg" onchange="handleFileSelect(event)" />
+      </div>
+
+      <div id="file-preview" style="display:none;background:var(--cream);border-radius:var(--radius-md);padding:var(--space-md);margin-bottom:var(--space-lg);display:flex;align-items:center;gap:var(--space-md)">
+        <span style="font-size:1.5rem">📄</span>
+        <div style="flex:1">
+          <div id="file-name" style="font-size:0.85rem;font-weight:600;color:var(--ink-mid)">document.pdf</div>
+          <div id="file-size" style="font-size:0.76rem;color:var(--muted)">1.2 MB</div>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="clearFile()">Remove</button>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group full">
+          <label class="form-label">Document Type</label>
+          <select class="form-control">
+            <option value="">Select type…</option>
+            <option value="0">FSA — Food Standards Agency Certificate</option>
+            <option value="1">OPSS — Product Safety Conformity</option>
+            <option value="2">DCTS — Developing Countries Trading Scheme</option>
+            <option value="3">UKRP — UK Responsible Person Declaration</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Document Title</label>
+          <input type="text" class="form-control" placeholder="e.g. FSA Certificate — Jollof Spice Mix" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Associated Supplier</label>
+          <select class="form-control">
+            <option>Lagos Foods Ltd</option>
+            <option>Abuja Naturals</option>
+            <option>Kano Grains Export Co.</option>
+            <option>East Delta Spices</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Expiry Date</label>
+          <input type="date" class="form-control" />
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Reference / Certificate Number</label>
+          <input type="text" class="form-control" placeholder="Optional — as printed on the document" />
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Notes for Compliance Team</label>
+          <textarea class="form-control" rows="2" placeholder="Any context the reviewer should know…"></textarea>
+        </div>
+      </div>
+
+      <div style="background:rgba(41,128,185,0.06);border:1.5px solid rgba(41,128,185,0.2);border-radius:var(--radius-md);padding:var(--space-md)">
+        <div style="font-size:0.78rem;color:var(--ink-mid)">
+          ℹ️ Uploaded documents are reviewed by the GUZE compliance team within <strong>2 working days</strong>. You'll receive an email notification when the review is complete.
+        </div>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost btn-sm" onclick="closeUploadModal()">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="submitUpload()">Submit Document</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── VIEW DOCUMENT MODAL ── -->
+<div class="modal-overlay" id="view-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Document Details</div>
+      <button class="modal-close" onclick="document.getElementById('view-modal').classList.remove('open')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="background:var(--cream);border-radius:var(--radius-md);padding:var(--space-xl);text-align:center;margin-bottom:var(--space-xl)">
+        <div style="font-size:4rem;margin-bottom:var(--space-sm)">📄</div>
+        <div style="font-size:0.9rem;font-weight:600;color:var(--ink-mid)">food_standards_cert_jollofmix.pdf</div>
+        <div style="font-size:0.78rem;color:var(--muted);margin-top:4px">PDF · 1.4 MB · Uploaded 01 Jan 2026</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-md);margin-bottom:var(--space-lg)">
+        <div style="background:var(--white);border:1px solid var(--cream-dark);border-radius:var(--radius-md);padding:var(--space-md)">
+          <div style="font-size:0.72rem;font-family:var(--font-mono);text-transform:uppercase;color:var(--muted);margin-bottom:4px">Type</div>
+          <div><span class="compliance-badge fsa">FSA</span></div>
+        </div>
+        <div style="background:var(--white);border:1px solid var(--cream-dark);border-radius:var(--radius-md);padding:var(--space-md)">
+          <div style="font-size:0.72rem;font-family:var(--font-mono);text-transform:uppercase;color:var(--muted);margin-bottom:4px">Status</div>
+          <span class="badge badge-green">Approved</span>
+        </div>
+        <div style="background:var(--white);border:1px solid var(--cream-dark);border-radius:var(--radius-md);padding:var(--space-md)">
+          <div style="font-size:0.72rem;font-family:var(--font-mono);text-transform:uppercase;color:var(--muted);margin-bottom:4px">Supplier</div>
+          <div style="font-size:0.88rem;font-weight:500;color:var(--ink-mid)">Lagos Foods Ltd</div>
+        </div>
+        <div style="background:var(--white);border:1px solid var(--cream-dark);border-radius:var(--radius-md);padding:var(--space-md)">
+          <div style="font-size:0.72rem;font-family:var(--font-mono);text-transform:uppercase;color:var(--muted);margin-bottom:4px">Expires</div>
+          <div style="font-size:0.88rem;font-weight:500;color:var(--ink-mid);font-family:var(--font-mono)">30 Nov 2026</div>
+        </div>
+      </div>
+      <div style="padding:var(--space-md);background:rgba(34,168,107,0.06);border:1.5px solid rgba(34,168,107,0.2);border-radius:var(--radius-md)">
+        <div style="font-size:0.8rem;font-weight:600;color:var(--green-mid);margin-bottom:4px">✓ Compliance Review Notes</div>
+        <div style="font-size:0.82rem;color:var(--ink-mid)">Approved by GUZE Compliance Team on 05 Jan 2026. Certificate verified against FSA register. No issues found.</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline btn-sm">⬇ Download PDF</button>
+      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('view-modal').classList.remove('open')">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  function openUploadModal() {
+    document.getElementById('upload-modal').classList.add('open');
+  }
+
+  function closeUploadModal() {
+    document.getElementById('upload-modal').classList.remove('open');
+  }
+
+  function handleFileSelect(e) {
+    const file = e.target.files[0];
+    if (file) showFilePreview(file);
+  }
+
+  function handleDrop(e) {
+    e.preventDefault();
+    document.getElementById('drop-zone').classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (file) showFilePreview(file);
+  }
+
+  function showFilePreview(file) {
+    document.getElementById('file-name').textContent = file.name;
+    document.getElementById('file-size').textContent = (file.size / 1024 / 1024).toFixed(1) + ' MB';
+    const preview = document.getElementById('file-preview');
+    preview.style.display = 'flex';
+    document.getElementById('drop-zone').style.display = 'none';
+  }
+
+  function clearFile() {
+    document.getElementById('file-preview').style.display = 'none';
+    document.getElementById('drop-zone').style.display = 'block';
+    document.getElementById('file-input').value = '';
+  }
+
+  function submitUpload() {
+    // Placeholder — wire to POST /api/v1/Compliance/documents
+    closeUploadModal();
+    alert('Document submitted for review. You\'ll receive an email confirmation shortly.');
+  }
+
+  function setFilter(el, filter) {
+    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+  }
+
+  // Close modals on overlay click
+  document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', e => {
+      if (e.target === overlay) overlay.classList.remove('open');
+    });
+  });
+</script>
+</body>
+</html>

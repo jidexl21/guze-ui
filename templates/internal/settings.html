@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Settings — GUZE</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../shared-styles.css" />
+  <style>
+    /* ── Settings layout ── */
+    .settings-layout {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: var(--space-xl);
+      align-items: start;
+    }
+
+    .settings-nav {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--cream-dark);
+      overflow: hidden;
+      position: sticky;
+      top: var(--space-xl);
+    }
+
+    .settings-nav-header {
+      padding: var(--space-md) var(--space-lg);
+      border-bottom: 1px solid var(--cream-dark);
+      font-family: var(--font-display);
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .settings-nav-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 11px var(--space-lg);
+      font-size: 0.88rem;
+      font-weight: 500;
+      color: var(--ink-mid);
+      text-decoration: none;
+      border-left: 3px solid transparent;
+      transition: all var(--transition);
+      cursor: pointer;
+    }
+
+    .settings-nav-link:hover {
+      background: var(--cream);
+      color: var(--green-deep);
+      border-left-color: var(--green-light);
+    }
+
+    .settings-nav-link.active {
+      background: rgba(34,168,107,0.06);
+      color: var(--green-deep);
+      border-left-color: var(--gold);
+      font-weight: 600;
+    }
+
+    .settings-nav-link .s-icon { font-size: 1rem; width: 20px; text-align: center; }
+
+    /* ── Section panels ── */
+    .settings-panel { display: none; }
+    .settings-panel.active { display: block; }
+
+    .settings-section {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--cream-dark);
+      margin-bottom: var(--space-lg);
+      overflow: hidden;
+    }
+
+    .settings-section-header {
+      padding: var(--space-md) var(--space-xl);
+      border-bottom: 1px solid var(--cream-dark);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .settings-section-title {
+      font-family: var(--font-display);
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--green-deep);
+    }
+
+    .settings-section-subtitle {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .settings-body { padding: var(--space-xl); }
+
+    /* ── Form fields ── */
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-lg);
+      margin-bottom: var(--space-lg);
+    }
+
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group.full { grid-column: 1 / -1; }
+
+    .form-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--ink-mid);
+      letter-spacing: 0.02em;
+    }
+
+    .form-control {
+      padding: 10px 14px;
+      border: 1.5px solid var(--cream-dark);
+      border-radius: var(--radius-md);
+      font-family: var(--font-body);
+      font-size: 0.88rem;
+      color: var(--ink);
+      background: var(--white);
+      transition: border-color var(--transition);
+      outline: none;
+    }
+
+    .form-control:focus { border-color: var(--green-bright); box-shadow: 0 0 0 3px rgba(34,168,107,0.12); }
+    .form-control:disabled { background: var(--cream); color: var(--muted); cursor: not-allowed; }
+
+    .form-hint { font-size: 0.75rem; color: var(--muted); }
+
+    /* ── Avatar upload ── */
+    .avatar-row {
+      display: flex;
+      align-items: center;
+      gap: var(--space-xl);
+      padding: var(--space-xl);
+      background: var(--cream);
+      border-radius: var(--radius-lg);
+      margin-bottom: var(--space-xl);
+    }
+
+    .avatar-circle {
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--green-mid), var(--green-bright));
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-display);
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--white);
+      flex-shrink: 0;
+      position: relative;
+      cursor: pointer;
+    }
+
+    .avatar-circle .avatar-edit {
+      position: absolute;
+      bottom: 0; right: 0;
+      width: 24px; height: 24px;
+      background: var(--gold);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.7rem;
+      border: 2px solid var(--white);
+    }
+
+    .avatar-info { flex: 1; }
+    .avatar-name {
+      font-family: var(--font-display);
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--green-deep);
+      margin-bottom: 4px;
+    }
+    .avatar-role { font-size: 0.82rem; color: var(--muted); margin-bottom: var(--space-md); }
+
+    /* ── Toggle switch ── */
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--cream);
+    }
+    .toggle-row:last-child { border-bottom: none; }
+
+    .toggle-info { flex: 1; padding-right: var(--space-xl); }
+    .toggle-label { font-size: 0.88rem; font-weight: 600; color: var(--ink-mid); margin-bottom: 2px; }
+    .toggle-desc { font-size: 0.78rem; color: var(--muted); }
+
+    .toggle-switch {
+      position: relative;
+      width: 44px; height: 24px;
+      flex-shrink: 0;
+    }
+
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+
+    .toggle-track {
+      position: absolute;
+      inset: 0;
+      background: var(--cream-dark);
+      border-radius: var(--radius-full);
+      cursor: pointer;
+      transition: background var(--transition);
+    }
+
+    .toggle-track::after {
+      content: '';
+      position: absolute;
+      width: 18px; height: 18px;
+      left: 3px; top: 3px;
+      background: var(--white);
+      border-radius: 50%;
+      transition: transform var(--transition);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .toggle-switch input:checked + .toggle-track { background: var(--green-bright); }
+    .toggle-switch input:checked + .toggle-track::after { transform: translateX(20px); }
+
+    /* ── Subscription tier card ── */
+    .tier-card {
+      border-radius: var(--radius-lg);
+      padding: var(--space-xl);
+      margin-bottom: var(--space-md);
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: all var(--transition);
+      position: relative;
+    }
+
+    .tier-card.current {
+      background: linear-gradient(135deg, rgba(10,56,40,0.04), rgba(34,168,107,0.04));
+      border-color: var(--green-bright);
+    }
+
+    .tier-card.upgrade {
+      background: var(--cream);
+      border-color: var(--cream-dark);
+    }
+
+    .tier-card.upgrade:hover { border-color: var(--gold); background: rgba(212,164,55,0.04); }
+
+    .tier-badge-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--space-md);
+    }
+
+    .tier-name {
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--green-deep);
+    }
+
+    .tier-price {
+      font-family: var(--font-mono);
+      font-size: 0.88rem;
+      color: var(--muted);
+    }
+
+    .tier-features {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: var(--space-md);
+    }
+
+    .tier-feature-pill {
+      font-size: 0.72rem;
+      padding: 3px 10px;
+      border-radius: var(--radius-full);
+      background: var(--cream);
+      color: var(--ink-mid);
+      border: 1px solid var(--cream-dark);
+    }
+
+    .tier-feature-pill.highlight {
+      background: rgba(34,168,107,0.1);
+      color: var(--green-mid);
+      border-color: var(--green-bright);
+    }
+
+    .current-pill {
+      position: absolute;
+      top: -10px; right: var(--space-lg);
+      background: var(--green-bright);
+      color: var(--white);
+      font-size: 0.68rem;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 3px 10px;
+      border-radius: var(--radius-full);
+    }
+
+    /* ── Security items ── */
+    .security-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--space-lg) 0;
+      border-bottom: 1px solid var(--cream);
+    }
+    .security-item:last-child { border-bottom: none; }
+
+    .security-item-info { display: flex; align-items: center; gap: var(--space-md); }
+    .security-icon {
+      width: 40px; height: 40px;
+      border-radius: var(--radius-md);
+      background: var(--cream);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+    .security-label { font-size: 0.88rem; font-weight: 600; color: var(--ink-mid); }
+    .security-status { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
+    .security-status.ok { color: var(--green-bright); }
+    .security-status.warn { color: var(--amber); }
+
+    /* ── Danger zone ── */
+    .danger-zone {
+      border: 1.5px solid rgba(192,57,43,0.25);
+      border-radius: var(--radius-lg);
+      padding: var(--space-xl);
+      background: rgba(192,57,43,0.02);
+    }
+
+    .danger-title {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--red-alert);
+      margin-bottom: var(--space-sm);
+    }
+
+    .btn-danger {
+      background: var(--red-alert);
+      color: var(--white);
+      border: none;
+    }
+    .btn-danger:hover { background: #a93226; }
+
+    @media (max-width: 900px) {
+      .settings-layout { grid-template-columns: 1fr; }
+      .settings-nav { position: static; display: flex; flex-wrap: wrap; gap: 4px; padding: var(--space-sm); }
+      .settings-nav-header { display: none; }
+      .settings-nav-link { padding: 8px 14px; border-left: none; border-bottom: 2px solid transparent; }
+      .settings-nav-link.active { border-left: none; border-bottom-color: var(--gold); }
+      .form-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <a href="../index.html" style="font-family:var(--font-display);font-size:1.1rem;font-weight:700;color:white;text-decoration:none;display:flex;align-items:center;gap:8px;">
+        <span>🇳🇬→🇬🇧</span> GUZE
+      </a>
+    </div>
+    <div class="sidebar-nav">
+      <div class="sidebar-section-label">Retailer Portal</div>
+      <a href="dashboard.html" class="sidebar-link"><span class="icon">📊</span> Dashboard</a>
+      <a href="catalogue.html" class="sidebar-link"><span class="icon">🛍️</span> Product Catalogue</a>
+      <a href="calculator.html" class="sidebar-link"><span class="icon">🧮</span> Landed Cost Calculator</a>
+      <a href="aggregation.html" class="sidebar-link"><span class="icon">📦</span> Container Tracker</a>
+      <div class="sidebar-section-label">Account</div>
+      <a href="settings.html" class="sidebar-link active"><span class="icon">⚙️</span> Settings</a>
+      <a href="documents.html" class="sidebar-link"><span class="icon">📄</span> My Documents</a>
+      <a href="#" class="sidebar-link"><span class="icon">💬</span> Support</a>
+    </div>
+    <div class="sidebar-footer">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <div style="width:34px;height:34px;border-radius:50%;background:var(--green-mid);display:flex;align-items:center;justify-content:center;font-size:0.82rem;color:white;font-weight:700;flex-shrink:0">JD</div>
+        <div>
+          <div style="font-size:0.82rem;color:white;font-weight:600">Jane Doe</div>
+          <div style="font-size:0.7rem;color:rgba(255,255,255,0.4)">UK Retailer · Growth</div>
+        </div>
+      </div>
+      <a href="../index.html" class="sidebar-link" style="font-size:0.8rem;padding:6px 16px"><span class="icon">↩️</span> Sign Out</a>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <div class="main-content">
+    <div class="page-header">
+      <div>
+        <button style="display:none;background:none;border:none;font-size:1.5rem;cursor:pointer;color:var(--green-deep);margin-right:8px" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+        <div class="page-title">Account Settings</div>
+        <div class="page-subtitle">Manage your profile, notifications, security, and subscription</div>
+      </div>
+      <span class="badge badge-green">● Growth Plan</span>
+    </div>
+
+    <div class="page-body">
+      <div class="settings-layout">
+
+        <!-- SETTINGS NAV -->
+        <div class="settings-nav">
+          <div class="settings-nav-header">Settings</div>
+          <a class="settings-nav-link active" onclick="showPanel('profile')">
+            <span class="s-icon">👤</span> Profile
+          </a>
+          <a class="settings-nav-link" onclick="showPanel('notifications')">
+            <span class="s-icon">🔔</span> Notifications
+          </a>
+          <a class="settings-nav-link" onclick="showPanel('security')">
+            <span class="s-icon">🔐</span> Security
+          </a>
+          <a class="settings-nav-link" onclick="showPanel('subscription')">
+            <span class="s-icon">💳</span> Subscription
+          </a>
+          <a class="settings-nav-link" onclick="showPanel('business')">
+            <span class="s-icon">🏢</span> Business Info
+          </a>
+        </div>
+
+        <!-- PANELS -->
+        <div>
+
+          <!-- ── PROFILE ──────────────────────────────────── -->
+          <div class="settings-panel active" id="panel-profile">
+            <div class="settings-section">
+              <div class="settings-section-header">
+                <div>
+                  <div class="settings-section-title">Profile Information</div>
+                  <div class="settings-section-subtitle">Your name, contact details, and delivery address</div>
+                </div>
+                <button class="btn btn-ghost btn-sm">Cancel</button>
+              </div>
+              <div class="settings-body">
+
+                <div class="avatar-row">
+                  <div class="avatar-circle">
+                    JD
+                    <div class="avatar-edit">✏️</div>
+                  </div>
+                  <div class="avatar-info">
+                    <div class="avatar-name">Jane Doe</div>
+                    <div class="avatar-role">UK Retailer · Member since March 2025</div>
+                    <button class="btn btn-outline btn-sm">Upload Photo</button>
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">First Name</label>
+                    <input type="text" class="form-control" value="Jane" />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Last Name</label>
+                    <input type="text" class="form-control" value="Doe" />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Email Address</label>
+                    <input type="email" class="form-control" value="jane.doe@retailshop.co.uk" />
+                    <span class="form-hint">✓ Verified</span>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Phone Number</label>
+                    <input type="tel" class="form-control" value="+44 7700 900441" />
+                  </div>
+                  <div class="form-group full">
+                    <label class="form-label">Delivery Address Line 1</label>
+                    <input type="text" class="form-control" value="12 Market Street" />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">City</label>
+                    <input type="text" class="form-control" value="Peckham" />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Postcode</label>
+                    <input type="text" class="form-control" value="SE15 4QH" />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Country</label>
+                    <select class="form-control">
+                      <option selected>United Kingdom</option>
+                      <option>Republic of Ireland</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Preferred Language</label>
+                    <select class="form-control">
+                      <option selected>English (UK)</option>
+                      <option>English (US)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div style="display:flex;justify-content:flex-end;gap:var(--space-sm)">
+                  <button class="btn btn-ghost btn-sm">Discard</button>
+                  <button class="btn btn-primary btn-sm">Save Changes</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── NOTIFICATIONS ────────────────────────────── -->
+          <div class="settings-panel" id="panel-notifications">
+            <div class="settings-section">
+              <div class="settings-section-header">
+                <div>
+                  <div class="settings-section-title">Email Notifications</div>
+                  <div class="settings-section-subtitle">Choose which emails GUZE sends to jane.doe@retailshop.co.uk</div>
+                </div>
+              </div>
+              <div class="settings-body">
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <div class="toggle-label">Order Confirmations</div>
+                    <div class="toggle-desc">Receive an email whenever an order is placed or updated</div>
+                  </div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" checked />
+                    <span class="toggle-track"></span>
+                  </label>
+                </div>
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <div class="toggle-label">Shipment Milestones</div>
+                    <div class="toggle-desc">Updates when your container departs, arrives at UK port, clears customs</div>
+                  </div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" checked />
+                    <span class="toggle-track"></span>
+                  </label>
+                </div>
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <div class="toggle-label">Compliance Alerts</div>
+                    <div class="toggle-desc">Notified when a product's compliance documents expire or are rejected</div>
+                  </div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" checked />
+                    <span class="toggle-track"></span>
+                  </label>
+                </div>
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <div class="toggle-label">Invoice &amp; Payment Receipts</div>
+                    <div class="toggle-desc">PDF invoice sent when an order is invoiced or payment confirmed</div>
+                  </div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" checked />
+                    <span class="toggle-track"></span>
+                  </label>
+                </div>
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <div class="toggle-label">Container Space Alerts</div>
+                    <div class="toggle-desc">Email when a container in your batch is reaching capacity (&gt;80%)</div>
+                  </div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" />
+                    <span class="toggle-track"></span>
+                  </label>
+                </div>
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <div class="toggle-label">Product Catalogue Updates</div>
+                    <div class="toggle-desc">New products from your saved suppliers, restocks on low-inventory items</div>
+                  </div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" />
+                    <span class="toggle-track"></span>
+                  </label>
+                </div>
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <div class="toggle-label">Marketing &amp; Platform News</div>
+                    <div class="toggle-desc">New features, supplier spotlights, and GUZE platform announcements</div>
+                  </div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" />
+                    <span class="toggle-track"></span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="settings-section">
+              <div class="settings-section-header">
+                <div>
+                  <div class="settings-section-title">In-App Notifications</div>
+                  <div class="settings-section-subtitle">Alerts shown inside the GUZE portal</div>
+                </div>
+              </div>
+              <div class="settings-body">
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <div class="toggle-label">Order &amp; Shipment Updates</div>
+                    <div class="toggle-desc">Bell icon notifications for status changes on active orders</div>
+                  </div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" checked />
+                    <span class="toggle-track"></span>
+                  </label>
+                </div>
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <div class="toggle-label">Price Change Alerts</div>
+                    <div class="toggle-desc">Notify when a saved product price changes by more than 5%</div>
+                  </div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" checked />
+                    <span class="toggle-track"></span>
+                  </label>
+                </div>
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <div class="toggle-label">Subscription Reminders</div>
+                    <div class="toggle-desc">Renewal reminder 7 days before your Growth plan renews</div>
+                  </div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" checked />
+                    <span class="toggle-track"></span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── SECURITY ──────────────────────────────────── -->
+          <div class="settings-panel" id="panel-security">
+            <div class="settings-section">
+              <div class="settings-section-header">
+                <div>
+                  <div class="settings-section-title">Security</div>
+                  <div class="settings-section-subtitle">Manage your password and account access</div>
+                </div>
+                <span class="badge badge-green">● Secure</span>
+              </div>
+              <div class="settings-body">
+
+                <div class="security-item">
+                  <div class="security-item-info">
+                    <div class="security-icon">🔑</div>
+                    <div>
+                      <div class="security-label">Password</div>
+                      <div class="security-status ok">Last changed 2 months ago</div>
+                    </div>
+                  </div>
+                  <button class="btn btn-outline btn-sm" onclick="toggleSection('change-password')">Change Password</button>
+                </div>
+
+                <div id="change-password" style="display:none;background:var(--cream);border-radius:var(--radius-md);padding:var(--space-lg);margin-bottom:var(--space-md)">
+                  <div class="form-row" style="margin-bottom:var(--space-md)">
+                    <div class="form-group">
+                      <label class="form-label">Current Password</label>
+                      <input type="password" class="form-control" placeholder="••••••••" />
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">New Password</label>
+                      <input type="password" class="form-control" placeholder="Min. 8 characters" />
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">Confirm New Password</label>
+                      <input type="password" class="form-control" placeholder="••••••••" />
+                    </div>
+                  </div>
+                  <div style="display:flex;gap:var(--space-sm)">
+                    <button class="btn btn-primary btn-sm">Update Password</button>
+                    <button class="btn btn-ghost btn-sm" onclick="toggleSection('change-password')">Cancel</button>
+                  </div>
+                </div>
+
+                <div class="security-item">
+                  <div class="security-item-info">
+                    <div class="security-icon">📱</div>
+                    <div>
+                      <div class="security-label">Two-Factor Authentication</div>
+                      <div class="security-status warn">Not enabled — recommended</div>
+                    </div>
+                  </div>
+                  <button class="btn btn-primary btn-sm">Enable 2FA</button>
+                </div>
+
+                <div class="security-item">
+                  <div class="security-item-info">
+                    <div class="security-icon">🖥️</div>
+                    <div>
+                      <div class="security-label">Active Sessions</div>
+                      <div class="security-status ok">2 devices — Chrome on macOS, Safari on iPhone</div>
+                    </div>
+                  </div>
+                  <button class="btn btn-ghost btn-sm">Manage</button>
+                </div>
+
+                <div class="security-item">
+                  <div class="security-item-info">
+                    <div class="security-icon">📋</div>
+                    <div>
+                      <div class="security-label">Login History</div>
+                      <div class="security-status">Last login: Today at 09:14 from London, UK</div>
+                    </div>
+                  </div>
+                  <button class="btn btn-ghost btn-sm">View Log</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="danger-zone">
+              <div class="danger-title">⚠️ Danger Zone</div>
+              <p style="font-size:0.85rem;color:var(--muted);margin-bottom:var(--space-md)">Deleting your account is permanent. All order history, documents, and preferences will be removed. Export your data before proceeding.</p>
+              <div style="display:flex;gap:var(--space-sm)">
+                <button class="btn btn-ghost btn-sm">Export My Data</button>
+                <button class="btn btn-danger btn-sm">Delete Account</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── SUBSCRIPTION ──────────────────────────────── -->
+          <div class="settings-panel" id="panel-subscription">
+            <div class="settings-section">
+              <div class="settings-section-header">
+                <div>
+                  <div class="settings-section-title">Your Subscription</div>
+                  <div class="settings-section-subtitle">Current plan, usage, and upgrade options</div>
+                </div>
+              </div>
+              <div class="settings-body">
+
+                <!-- Current plan summary -->
+                <div style="background:var(--cream);border-radius:var(--radius-lg);padding:var(--space-xl);margin-bottom:var(--space-xl);display:flex;align-items:center;gap:var(--space-xl)">
+                  <div style="flex:1">
+                    <div style="font-size:0.72rem;font-family:var(--font-mono);font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin-bottom:4px">Current Plan</div>
+                    <div style="font-family:var(--font-display);font-size:1.6rem;font-weight:700;color:var(--green-deep);margin-bottom:4px">Growth</div>
+                    <div style="font-size:0.82rem;color:var(--muted)">£49.99/month · Renews 7 July 2026</div>
+                  </div>
+                  <div style="text-align:right">
+                    <div style="font-size:0.72rem;font-family:var(--font-mono);color:var(--muted);margin-bottom:4px">AGGREGATIONS USED</div>
+                    <div style="font-family:var(--font-display);font-size:2rem;font-weight:700;color:var(--green-deep)">1 <span style="font-size:1rem;color:var(--muted)">/ 2</span></div>
+                    <div style="height:6px;background:var(--cream-dark);border-radius:3px;width:120px;margin-top:6px">
+                      <div style="height:100%;background:var(--green-bright);border-radius:3px;width:50%"></div>
+                    </div>
+                    <div style="font-size:0.72rem;color:var(--muted);margin-top:4px">Resets 7 July 2026</div>
+                  </div>
+                </div>
+
+                <!-- Tier cards -->
+                <div style="margin-bottom:var(--space-xl)">
+                  <div style="font-size:0.82rem;font-weight:600;color:var(--muted);margin-bottom:var(--space-md)">AVAILABLE PLANS</div>
+
+                  <div class="tier-card upgrade">
+                    <div class="tier-badge-row">
+                      <div class="tier-name">Free</div>
+                      <div class="tier-price">£0 / month</div>
+                    </div>
+                    <div class="tier-features">
+                      <span class="tier-feature-pill">Full catalogue access</span>
+                      <span class="tier-feature-pill">Unlimited orders</span>
+                      <span class="tier-feature-pill">Standard shipping</span>
+                    </div>
+                    <button class="btn btn-ghost btn-sm">Downgrade to Free</button>
+                  </div>
+
+                  <div class="tier-card current">
+                    <div class="current-pill">Current Plan</div>
+                    <div class="tier-badge-row">
+                      <div class="tier-name">Growth</div>
+                      <div class="tier-price">£49.99 / month</div>
+                    </div>
+                    <div class="tier-features">
+                      <span class="tier-feature-pill highlight">5% product discount</span>
+                      <span class="tier-feature-pill highlight">2 aggregations / month</span>
+                      <span class="tier-feature-pill">Standard shipping</span>
+                      <span class="tier-feature-pill">Priority support</span>
+                    </div>
+                    <span class="badge badge-green">Active</span>
+                  </div>
+
+                  <div class="tier-card upgrade">
+                    <div class="tier-badge-row">
+                      <div class="tier-name">Pro</div>
+                      <div class="tier-price">£99.99 / month</div>
+                    </div>
+                    <div class="tier-features">
+                      <span class="tier-feature-pill highlight">10% product discount</span>
+                      <span class="tier-feature-pill highlight">Unlimited aggregations</span>
+                      <span class="tier-feature-pill highlight">5% logistics discount</span>
+                      <span class="tier-feature-pill highlight">Priority routing</span>
+                      <span class="tier-feature-pill highlight">Advanced analytics</span>
+                    </div>
+                    <button class="btn btn-primary btn-sm">Upgrade to Pro →</button>
+                  </div>
+                </div>
+
+                <!-- Billing history -->
+                <div style="font-size:0.82rem;font-weight:600;color:var(--muted);margin-bottom:var(--space-md)">BILLING HISTORY</div>
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Description</th>
+                      <th>Amount</th>
+                      <th>Status</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td style="font-family:var(--font-mono);font-size:0.82rem">07 Jun 2026</td>
+                      <td>Growth Plan — June 2026</td>
+                      <td style="font-weight:600">£49.99</td>
+                      <td><span class="badge badge-green">Paid</span></td>
+                      <td><button class="btn btn-ghost btn-sm">Download PDF</button></td>
+                    </tr>
+                    <tr>
+                      <td style="font-family:var(--font-mono);font-size:0.82rem">07 May 2026</td>
+                      <td>Growth Plan — May 2026</td>
+                      <td style="font-weight:600">£49.99</td>
+                      <td><span class="badge badge-green">Paid</span></td>
+                      <td><button class="btn btn-ghost btn-sm">Download PDF</button></td>
+                    </tr>
+                    <tr>
+                      <td style="font-family:var(--font-mono);font-size:0.82rem">07 Apr 2026</td>
+                      <td>Growth Plan — April 2026</td>
+                      <td style="font-weight:600">£49.99</td>
+                      <td><span class="badge badge-green">Paid</span></td>
+                      <td><button class="btn btn-ghost btn-sm">Download PDF</button></td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                <div style="margin-top:var(--space-xl);padding-top:var(--space-lg);border-top:1px solid var(--cream-dark);display:flex;justify-content:space-between;align-items:center">
+                  <div>
+                    <div style="font-size:0.85rem;font-weight:600;color:var(--ink-mid)">Payment Method</div>
+                    <div style="font-size:0.82rem;color:var(--muted);margin-top:2px">Visa ending 4242 · Expires 12/27</div>
+                  </div>
+                  <div style="display:flex;gap:var(--space-sm)">
+                    <button class="btn btn-ghost btn-sm">Update Card</button>
+                    <button class="btn btn-ghost btn-sm" style="color:var(--red-alert);border-color:rgba(192,57,43,0.3)">Cancel Subscription</button>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+          <!-- ── BUSINESS INFO ─────────────────────────────── -->
+          <div class="settings-panel" id="panel-business">
+            <div class="settings-section">
+              <div class="settings-section-header">
+                <div>
+                  <div class="settings-section-title">Business Information</div>
+                  <div class="settings-section-subtitle">Used for invoicing, compliance, and HMRC import documentation</div>
+                </div>
+                <span class="badge badge-green">✓ Verified</span>
+              </div>
+              <div class="settings-body">
+                <div class="form-row">
+                  <div class="form-group full">
+                    <label class="form-label">Trading Name</label>
+                    <input type="text" class="form-control" value="Jane's African Groceries Ltd" />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Companies House Number</label>
+                    <input type="text" class="form-control" value="12345678" />
+                    <span class="form-hint">Used for import declarations</span>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">EORI Number</label>
+                    <input type="text" class="form-control" value="GB123456789000" />
+                    <span class="form-hint">Required for all UK imports</span>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">VAT Registration Number</label>
+                    <input type="text" class="form-control" placeholder="GB123456789" />
+                    <span class="form-hint">Optional — for VAT-registered businesses</span>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Business Type</label>
+                    <select class="form-control">
+                      <option selected>Independent Retailer</option>
+                      <option>Restaurant / Caterer</option>
+                      <option>Mini Supermarket</option>
+                      <option>Online Retailer</option>
+                      <option>Wholesaler</option>
+                    </select>
+                  </div>
+                  <div class="form-group full">
+                    <label class="form-label">Registered Business Address</label>
+                    <input type="text" class="form-control" value="12 Market Street, Peckham, London SE15 4QH" />
+                  </div>
+                </div>
+
+                <div style="background:rgba(41,128,185,0.06);border:1.5px solid rgba(41,128,185,0.2);border-radius:var(--radius-md);padding:var(--space-md);margin-bottom:var(--space-lg)">
+                  <div style="font-size:0.82rem;font-weight:600;color:var(--blue-info);margin-bottom:4px">ℹ️ Verification Status</div>
+                  <div style="font-size:0.8rem;color:var(--ink-mid)">Your business details have been verified by the GUZE compliance team. Changes to your EORI number or Companies House number will require re-verification.</div>
+                </div>
+
+                <div style="display:flex;justify-content:flex-end;gap:var(--space-sm)">
+                  <button class="btn btn-ghost btn-sm">Discard</button>
+                  <button class="btn btn-primary btn-sm">Save Changes</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /panels -->
+      </div><!-- /settings-layout -->
+    </div><!-- /page-body -->
+  </div><!-- /main-content -->
+</div><!-- /app-layout -->
+
+<script>
+  function showPanel(name) {
+    document.querySelectorAll('.settings-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.settings-nav-link').forEach(l => l.classList.remove('active'));
+    document.getElementById('panel-' + name).classList.add('active');
+    event.currentTarget.classList.add('active');
+  }
+  function toggleSection(id) {
+    const el = document.getElementById(id);
+    el.style.display = el.style.display === 'none' ? 'block' : 'none';
+  }
+</script>
+</body>
+</html>

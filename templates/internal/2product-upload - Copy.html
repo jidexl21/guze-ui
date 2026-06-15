@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Add Product — GUZE Supplier</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../shared-styles.css" />
+  <style>
+    /* ── Supplier sidebar override ── */
+    .sidebar {
+      background: #1A1A2E !important;
+    }
+
+    .sidebar-section-label {
+      color: rgba(255,255,255,0.3) !important;
+    }
+
+    .sidebar-link.active {
+      background: rgba(255,255,255,0.1) !important;
+      color: white !important;
+      border-left-color: var(--gold) !important;
+    }
+
+    /* ── Two-column form layout ── */
+    .product-form-layout {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: var(--space-xl);
+      align-items: start;
+    }
+
+    /* ── Form card ── */
+    .form-card {
+      background: var(--white);
+      border: 1px solid var(--cream-dark);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      margin-bottom: var(--space-lg);
+    }
+
+    .form-card-header {
+      padding: var(--space-md) var(--space-xl);
+      border-bottom: 1px solid var(--cream-dark);
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+    }
+
+    .form-card-number {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      background: var(--green-deep);
+      color: var(--white);
+      font-size: 0.78rem;
+      font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      font-family: var(--font-mono);
+    }
+
+    .form-card-title {
+      font-family: var(--font-display);
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--green-deep);
+    }
+
+    .form-card-subtitle {
+      font-size: 0.76rem;
+      color: var(--muted);
+      margin-top: 1px;
+    }
+
+    .form-card-body { padding: var(--space-xl); }
+
+    /* ── Form rows ── */
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-lg);
+      margin-bottom: var(--space-lg);
+    }
+
+    .form-row.thirds {
+      grid-template-columns: 1fr 1fr 1fr;
+    }
+
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group.full { grid-column: 1 / -1; }
+    .form-group.span2 { grid-column: span 2; }
+
+    .form-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--ink-mid);
+      letter-spacing: 0.01em;
+    }
+
+    .form-label .required { color: var(--red-alert); margin-left: 2px; }
+
+    .form-control {
+      padding: 10px 14px;
+      border: 1.5px solid var(--cream-dark);
+      border-radius: var(--radius-md);
+      font-family: var(--font-body);
+      font-size: 0.88rem;
+      color: var(--ink);
+      background: var(--white);
+      transition: border-color var(--transition);
+      outline: none;
+    }
+
+    .form-control:focus { border-color: var(--green-bright); box-shadow: 0 0 0 3px rgba(34,168,107,0.12); }
+    .form-hint { font-size: 0.74rem; color: var(--muted); }
+
+    textarea.form-control { resize: vertical; min-height: 100px; }
+
+    /* ── Image upload grid ── */
+    .image-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--space-md);
+    }
+
+    .image-slot {
+      aspect-ratio: 1;
+      border: 2px dashed var(--cream-dark);
+      border-radius: var(--radius-md);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all var(--transition);
+      background: var(--cream);
+      font-size: 0.72rem;
+      color: var(--muted);
+      gap: 6px;
+      text-align: center;
+      padding: var(--space-sm);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .image-slot:hover { border-color: var(--green-bright); background: rgba(34,168,107,0.04); }
+    .image-slot.filled { border-style: solid; border-color: var(--green-bright); }
+    .image-slot.primary-slot { border-color: var(--gold); }
+
+    .image-slot .slot-icon { font-size: 1.4rem; }
+
+    .image-slot.primary-slot::after {
+      content: 'PRIMARY';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      background: var(--gold);
+      color: white;
+      font-size: 0.62rem;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      text-align: center;
+      padding: 3px;
+      letter-spacing: 0.08em;
+    }
+
+    .image-filled-preview {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      border-radius: calc(var(--radius-md) - 2px);
+    }
+
+    /* ── Price calculator strip ── */
+    .price-strip {
+      background: var(--cream);
+      border-radius: var(--radius-md);
+      padding: var(--space-lg);
+      margin-top: var(--space-md);
+      display: grid;
+      grid-template-columns: 1fr auto 1fr auto 1fr;
+      align-items: center;
+      gap: var(--space-md);
+      text-align: center;
+    }
+
+    .price-strip-arrow { font-size: 1.2rem; color: var(--muted); }
+
+    .price-strip-item { }
+    .price-strip-label { font-size: 0.7rem; font-family: var(--font-mono); text-transform: uppercase; color: var(--muted); letter-spacing: 0.08em; margin-bottom: 4px; }
+    .price-strip-val { font-family: var(--font-display); font-size: 1.2rem; font-weight: 700; color: var(--green-deep); }
+    .price-strip-val.gold { color: var(--gold); }
+
+    /* ── HS code helper ── */
+    .hs-helper {
+      background: rgba(41,128,185,0.06);
+      border: 1.5px solid rgba(41,128,185,0.2);
+      border-radius: var(--radius-md);
+      padding: var(--space-md);
+      margin-top: var(--space-sm);
+      font-size: 0.78rem;
+      color: var(--ink-mid);
+    }
+
+    /* ── Sidebar panel (right) ── */
+    .sidebar-panel {
+      position: sticky;
+      top: var(--space-xl);
+    }
+
+    .sidebar-panel .form-card { margin-bottom: var(--space-md); }
+
+    /* ── Compliance attach ── */
+    .doc-attach-list { display: flex; flex-direction: column; gap: var(--space-sm); }
+
+    .doc-attach-item {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      padding: 10px var(--space-md);
+      border: 1.5px solid var(--cream-dark);
+      border-radius: var(--radius-md);
+      background: var(--white);
+      cursor: pointer;
+      transition: all var(--transition);
+      font-size: 0.82rem;
+      color: var(--ink-mid);
+    }
+
+    .doc-attach-item:hover { border-color: var(--green-bright); background: rgba(34,168,107,0.04); }
+    .doc-attach-item.selected { border-color: var(--green-bright); background: rgba(34,168,107,0.06); }
+
+    .doc-attach-item input[type=checkbox] { accent-color: var(--green-bright); width: 16px; height: 16px; flex-shrink: 0; }
+    .doc-attach-meta { flex: 1; }
+    .doc-attach-name { font-weight: 500; }
+    .doc-attach-type { font-size: 0.72rem; color: var(--muted); }
+
+    /* ── Publish actions ── */
+    .publish-card {
+      background: linear-gradient(135deg, var(--green-deep), #0D4830);
+      border-radius: var(--radius-lg);
+      padding: var(--space-xl);
+      color: var(--white);
+    }
+
+    .publish-card-title {
+      font-family: var(--font-display);
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: var(--space-sm);
+    }
+
+    .publish-card-hint {
+      font-size: 0.78rem;
+      opacity: 0.6;
+      margin-bottom: var(--space-lg);
+      line-height: 1.5;
+    }
+
+    .btn-white {
+      background: var(--white);
+      color: var(--green-deep);
+      border: none;
+      font-weight: 700;
+    }
+
+    .btn-white:hover { background: var(--cream); }
+
+    .btn-white-outline {
+      background: transparent;
+      color: rgba(255,255,255,0.8);
+      border: 1.5px solid rgba(255,255,255,0.3);
+      font-weight: 500;
+    }
+
+    .btn-white-outline:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.6); }
+
+    /* ── Tag input ── */
+    .tag-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      padding: 8px 10px;
+      border: 1.5px solid var(--cream-dark);
+      border-radius: var(--radius-md);
+      min-height: 44px;
+      cursor: text;
+      align-items: center;
+      transition: border-color var(--transition);
+    }
+
+    .tag-wrap:focus-within { border-color: var(--green-bright); box-shadow: 0 0 0 3px rgba(34,168,107,0.12); }
+
+    .tag-pill {
+      background: rgba(34,168,107,0.1);
+      color: var(--green-mid);
+      font-size: 0.76rem;
+      padding: 3px 8px;
+      border-radius: var(--radius-full);
+      border: 1px solid rgba(34,168,107,0.25);
+      display: flex; align-items: center; gap: 4px;
+    }
+
+    .tag-remove { cursor: pointer; opacity: 0.6; font-size: 0.8rem; }
+    .tag-remove:hover { opacity: 1; }
+
+    .tag-input { border: none; outline: none; font-size: 0.85rem; font-family: var(--font-body); min-width: 80px; flex: 1; background: transparent; }
+
+    /* ── Step progress ── */
+    .step-progress {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      margin-bottom: var(--space-xl);
+      background: var(--white);
+      border: 1px solid var(--cream-dark);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+
+    .step-item {
+      flex: 1;
+      padding: 12px var(--space-md);
+      text-align: center;
+      font-size: 0.78rem;
+      color: var(--muted);
+      border-right: 1px solid var(--cream-dark);
+      position: relative;
+    }
+
+    .step-item:last-child { border-right: none; }
+    .step-item.active { background: rgba(34,168,107,0.06); color: var(--green-mid); font-weight: 700; }
+    .step-item.done { background: var(--cream); color: var(--green-bright); }
+
+    .step-num {
+      display: inline-flex;
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      background: var(--cream-dark);
+      color: var(--muted);
+      font-size: 0.72rem;
+      font-weight: 700;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 3px;
+    }
+
+    .step-item.active .step-num { background: var(--green-bright); color: white; }
+    .step-item.done .step-num { background: var(--green-bright); color: white; }
+
+    @media (max-width: 1024px) {
+      .product-form-layout { grid-template-columns: 1fr; }
+      .sidebar-panel { position: static; }
+    }
+
+    @media (max-width: 600px) {
+      .form-row { grid-template-columns: 1fr; }
+      .form-row.thirds { grid-template-columns: 1fr; }
+      .image-grid { grid-template-columns: repeat(2, 1fr); }
+      .price-strip { grid-template-columns: 1fr; }
+      .price-strip-arrow { display: none; }
+    }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+
+  <!-- SUPPLIER SIDEBAR -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <a href="../index.html" style="font-family:var(--font-display);font-size:1.1rem;font-weight:700;color:white;text-decoration:none;display:flex;align-items:center;gap:8px;">
+        <span>🇳🇬</span> GUZE Supplier
+      </a>
+    </div>
+    <div class="sidebar-nav">
+      <div class="sidebar-section-label">Supplier Portal</div>
+      <a href="supplier-dashboard.html" class="sidebar-link"><span class="icon">📊</span> Dashboard</a>
+      <a href="supplier-products.html" class="sidebar-link active"><span class="icon">📦</span> My Products</a>
+      <a href="supplier-orders.html" class="sidebar-link"><span class="icon">🛒</span> Orders</a>
+      <a href="supplier-invoices.html" class="sidebar-link"><span class="icon">🧾</span> Invoices</a>
+      <div class="sidebar-section-label">Compliance</div>
+      <a href="supplier-compliance.html" class="sidebar-link"><span class="icon">✅</span> Documents</a>
+      <a href="supplier-shipments.html" class="sidebar-link"><span class="icon">🚢</span> Shipments</a>
+      <div class="sidebar-section-label">Account</div>
+      <a href="supplier-settings.html" class="sidebar-link"><span class="icon">⚙️</span> Settings</a>
+    </div>
+    <div class="sidebar-footer">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <div style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;font-size:0.82rem;color:white;font-weight:700;flex-shrink:0">LF</div>
+        <div>
+          <div style="font-size:0.82rem;color:white;font-weight:600">Lagos Foods Ltd</div>
+          <div style="font-size:0.7rem;color:rgba(255,255,255,0.4)">Supplier · Approved</div>
+        </div>
+      </div>
+      <a href="../index.html" class="sidebar-link" style="font-size:0.8rem;padding:6px 16px"><span class="icon">↩️</span> Sign Out</a>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <div class="main-content">
+    <div class="page-header">
+      <div>
+        <div style="display:flex;align-items:center;gap:var(--space-sm);margin-bottom:4px">
+          <a href="supplier-products.html" style="font-size:0.82rem;color:var(--muted);text-decoration:none;">My Products</a>
+          <span style="color:var(--muted)">›</span>
+          <span style="font-size:0.82rem;color:var(--ink-mid)">Add New Product</span>
+        </div>
+        <div class="page-title">Add New Product</div>
+        <div class="page-subtitle">Fill in product details, pricing, and attach compliance documents</div>
+      </div>
+      <div style="display:flex;gap:var(--space-sm)">
+        <button class="btn btn-ghost btn-sm">Save Draft</button>
+        <a href="supplier-products.html" class="btn btn-outline btn-sm">Discard</a>
+      </div>
+    </div>
+
+    <div class="page-body">
+
+      <!-- Progress bar -->
+      <div class="step-progress">
+        <div class="step-item active">
+          <div><div class="step-num">1</div></div>
+          <div>Product Info</div>
+        </div>
+        <div class="step-item">
+          <div><div class="step-num">2</div></div>
+          <div>Pricing &amp; Stock</div>
+        </div>
+        <div class="step-item">
+          <div><div class="step-num">3</div></div>
+          <div>Import Details</div>
+        </div>
+        <div class="step-item">
+          <div><div class="step-num">4</div></div>
+          <div>Compliance</div>
+        </div>
+        <div class="step-item">
+          <div><div class="step-num">5</div></div>
+          <div>Review &amp; Publish</div>
+        </div>
+      </div>
+
+      <div class="product-form-layout">
+        <!-- LEFT COLUMN -->
+        <div>
+
+          <!-- 1. Product Information -->
+          <div class="form-card">
+            <div class="form-card-header">
+              <div class="form-card-number">1</div>
+              <div>
+                <div class="form-card-title">Product Information</div>
+                <div class="form-card-subtitle">Name, description, category, and identifiers</div>
+              </div>
+            </div>
+            <div class="form-card-body">
+              <div class="form-row">
+                <div class="form-group full">
+                  <label class="form-label">Product Name <span class="required">*</span></label>
+                  <input type="text" class="form-control" placeholder="e.g. Premium Jollof Rice Spice Mix 200g" />
+                  <span class="form-hint">Be specific — include weight or size where relevant</span>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Category <span class="required">*</span></label>
+                  <select class="form-control">
+                    <option value="">Select…</option>
+                    <option>Spices &amp; Seasonings</option>
+                    <option>Grains &amp; Flours</option>
+                    <option>Condiments &amp; Sauces</option>
+                    <option>Dried Goods</option>
+                    <option>Beverages</option>
+                    <option>Snacks &amp; Confectionery</option>
+                    <option>Personal Care</option>
+                    <option>Household Products</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Sub-Category</label>
+                  <select class="form-control">
+                    <option value="">Select…</option>
+                    <option>Rice Seasoning</option>
+                    <option>Dry Rubs</option>
+                    <option>Pepper Blends</option>
+                    <option>Soup Bases</option>
+                  </select>
+                </div>
+                <div class="form-group full">
+                  <label class="form-label">Product Description <span class="required">*</span></label>
+                  <textarea class="form-control" rows="4" placeholder="Describe the product — ingredients, use cases, storage instructions, shelf life…"></textarea>
+                  <span class="form-hint">Min. 50 characters. This appears on the product catalogue page.</span>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">SKU / Product Code</label>
+                  <input type="text" class="form-control" placeholder="LFL-JMX-200" style="font-family:var(--font-mono)" />
+                  <span class="form-hint">Your internal reference code</span>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Barcode (EAN/UPC)</label>
+                  <input type="text" class="form-control" placeholder="5012345678901" style="font-family:var(--font-mono)" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Brand</label>
+                  <input type="text" class="form-control" placeholder="Lagos Foods" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Manufacturer</label>
+                  <input type="text" class="form-control" placeholder="Lagos Foods Ltd" />
+                </div>
+                <div class="form-group full">
+                  <label class="form-label">Search Tags</label>
+                  <div class="tag-wrap" onclick="this.querySelector('.tag-input').focus()">
+                    <div class="tag-pill">jollof rice<span class="tag-remove" onclick="removeTag(this)">×</span></div>
+                    <div class="tag-pill">nigerian spice<span class="tag-remove" onclick="removeTag(this)">×</span></div>
+                    <input class="tag-input" type="text" placeholder="Add tag…" onkeydown="handleTagInput(event, this)" />
+                  </div>
+                  <span class="form-hint">Press Enter or comma to add. Helps buyers find your product.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. Product Images -->
+          <div class="form-card">
+            <div class="form-card-header">
+              <div class="form-card-number">2</div>
+              <div>
+                <div class="form-card-title">Product Images</div>
+                <div class="form-card-subtitle">Upload up to 8 photos. First image is the primary listing photo.</div>
+              </div>
+            </div>
+            <div class="form-card-body">
+              <div class="image-grid">
+                <div class="image-slot primary-slot" onclick="triggerImageUpload(0)">
+                  <div class="slot-icon">📷</div>
+                  <span>Add Photo</span>
+                </div>
+                <div class="image-slot" onclick="triggerImageUpload(1)">
+                  <div class="slot-icon">+</div>
+                  <span>Add Photo</span>
+                </div>
+                <div class="image-slot" onclick="triggerImageUpload(2)">
+                  <div class="slot-icon">+</div>
+                  <span>Add Photo</span>
+                </div>
+                <div class="image-slot" onclick="triggerImageUpload(3)">
+                  <div class="slot-icon">+</div>
+                  <span>Add Photo</span>
+                </div>
+              </div>
+              <div style="margin-top:var(--space-md);font-size:0.76rem;color:var(--muted)">
+                Accepted: JPG, PNG, WebP · Max 5 MB per image · Min 800×800 px recommended
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. Pricing & Stock -->
+          <div class="form-card">
+            <div class="form-card-header">
+              <div class="form-card-number">3</div>
+              <div>
+                <div class="form-card-title">Pricing &amp; Stock</div>
+                <div class="form-card-subtitle">FOB price, MOQ, and inventory levels</div>
+              </div>
+            </div>
+            <div class="form-card-body">
+              <div class="form-row thirds">
+                <div class="form-group">
+                  <label class="form-label">Unit Price (FOB) <span class="required">*</span></label>
+                  <div style="position:relative">
+                    <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:0.85rem;color:var(--muted);font-family:var(--font-mono)">₦</span>
+                    <input type="number" class="form-control" style="padding-left:28px" placeholder="0.00" oninput="updatePriceStrip()" id="fob-price" />
+                  </div>
+                  <span class="form-hint">Naira per unit (FOB Lagos)</span>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Currency</label>
+                  <select class="form-control">
+                    <option selected>NGN — Nigerian Naira</option>
+                    <option>USD — US Dollar</option>
+                    <option>GBP — British Pound</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Price Per <span class="required">*</span></label>
+                  <select class="form-control">
+                    <option>Unit</option>
+                    <option>Carton (12 units)</option>
+                    <option>Carton (24 units)</option>
+                    <option>Pallet</option>
+                    <option>KG</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Minimum Order Qty <span class="required">*</span></label>
+                  <input type="number" class="form-control" placeholder="50" min="1" />
+                  <span class="form-hint">Minimum units per order</span>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Bulk Discount Threshold</label>
+                  <input type="number" class="form-control" placeholder="200" />
+                  <span class="form-hint">Units to trigger bulk discount</span>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Bulk Discount %</label>
+                  <div style="position:relative">
+                    <input type="number" class="form-control" style="padding-right:28px" placeholder="5" min="0" max="50" />
+                    <span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:0.85rem;color:var(--muted)">%</span>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Stock on Hand <span class="required">*</span></label>
+                  <input type="number" class="form-control" placeholder="500" min="0" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Low Stock Alert Threshold</label>
+                  <input type="number" class="form-control" placeholder="50" />
+                  <span class="form-hint">Alert when stock falls below this</span>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Restock Lead Time</label>
+                  <div style="position:relative">
+                    <input type="number" class="form-control" style="padding-right:42px" placeholder="14" />
+                    <span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:0.78rem;color:var(--muted)">days</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Live price breakdown -->
+              <div class="price-strip">
+                <div class="price-strip-item">
+                  <div class="price-strip-label">FOB Price</div>
+                  <div class="price-strip-val" id="strip-fob">₦ —</div>
+                </div>
+                <div class="price-strip-arrow">→</div>
+                <div class="price-strip-item">
+                  <div class="price-strip-label">Est. Landed Cost</div>
+                  <div class="price-strip-val" id="strip-landed">£ —</div>
+                </div>
+                <div class="price-strip-arrow">→</div>
+                <div class="price-strip-item">
+                  <div class="price-strip-label">Est. Retail Price</div>
+                  <div class="price-strip-val gold" id="strip-retail">£ —</div>
+                </div>
+              </div>
+              <div style="text-align:center;font-size:0.72rem;color:var(--muted);margin-top:var(--space-sm)">
+                Estimates based on current freight, duty, and VAT rates. Actual prices calculated at checkout.
+              </div>
+            </div>
+          </div>
+
+          <!-- 4. Import & Logistics Details -->
+          <div class="form-card">
+            <div class="form-card-header">
+              <div class="form-card-number">4</div>
+              <div>
+                <div class="form-card-title">Import &amp; Logistics Details</div>
+                <div class="form-card-subtitle">Required for UK customs clearance and HMRC documentation</div>
+              </div>
+            </div>
+            <div class="form-card-body">
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">HS Code (UK Tariff) <span class="required">*</span></label>
+                  <input type="text" class="form-control" placeholder="2103.90.90" style="font-family:var(--font-mono)" />
+                  <div class="hs-helper">
+                    ℹ️ Not sure? Use the <a href="https://www.trade-tariff.service.gov.uk" target="_blank" style="color:var(--green-mid)">UK Trade Tariff</a> to look up the correct code for your product.
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Country of Origin <span class="required">*</span></label>
+                  <select class="form-control">
+                    <option value="">Select…</option>
+                    <option selected>Nigeria</option>
+                    <option>Ghana</option>
+                    <option>Kenya</option>
+                    <option>South Africa</option>
+                    <option>Ethiopia</option>
+                    <option>Senegal</option>
+                    <option>Ivory Coast</option>
+                    <option>Cameroon</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Import Duty Rate</label>
+                  <div style="position:relative">
+                    <input type="number" class="form-control" style="padding-right:28px" value="0" min="0" max="100" step="0.1" readonly style="background:var(--cream)" />
+                    <span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:0.85rem;color:var(--muted)">%</span>
+                  </div>
+                  <span class="form-hint">Auto-populated from HS code</span>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">DCTS Eligible?</label>
+                  <select class="form-control">
+                    <option>Yes — Eligible for DCTS tariff preference</option>
+                    <option>No — Standard MFN rate applies</option>
+                    <option>Unknown / Check with GUZE</option>
+                  </select>
+                  <span class="form-hint">Developing Countries Trading Scheme reduces or eliminates UK import duty for eligible products</span>
+                </div>
+
+                <div class="form-group full">
+                  <label class="form-label">Product Dimensions</label>
+                  <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:var(--space-md)">
+                    <div>
+                      <input type="number" class="form-control" placeholder="L (cm)" />
+                    </div>
+                    <div>
+                      <input type="number" class="form-control" placeholder="W (cm)" />
+                    </div>
+                    <div>
+                      <input type="number" class="form-control" placeholder="H (cm)" />
+                    </div>
+                    <div>
+                      <input type="number" class="form-control" placeholder="Weight (kg)" />
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Units Per Carton</label>
+                  <input type="number" class="form-control" placeholder="12" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Carton Weight (kg)</label>
+                  <input type="number" class="form-control" placeholder="5.5" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Shelf Life</label>
+                  <div style="position:relative">
+                    <input type="number" class="form-control" style="padding-right:52px" placeholder="24" />
+                    <span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:0.78rem;color:var(--muted)">months</span>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Storage Requirements</label>
+                  <select class="form-control">
+                    <option>Ambient (Room Temperature)</option>
+                    <option>Refrigerated (4°C)</option>
+                    <option>Frozen (-18°C)</option>
+                    <option>Cool &amp; Dry</option>
+                  </select>
+                </div>
+
+                <div class="form-group full">
+                  <label class="form-label">Special Handling / Regulatory Notes</label>
+                  <textarea class="form-control" rows="2" placeholder="e.g. Contains allergens (nuts), requires FSAI notification, controlled substance declaration…"></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /left column -->
+
+        <!-- RIGHT SIDEBAR -->
+        <div class="sidebar-panel">
+
+          <!-- Compliance Documents -->
+          <div class="form-card">
+            <div class="form-card-header">
+              <div class="form-card-number">5</div>
+              <div>
+                <div class="form-card-title">Compliance Documents</div>
+                <div class="form-card-subtitle">Attach required certificates</div>
+              </div>
+            </div>
+            <div class="form-card-body" style="padding:var(--space-lg)">
+              <div style="font-size:0.78rem;color:var(--muted);margin-bottom:var(--space-md)">
+                Select from your uploaded documents, or <a href="supplier-compliance.html" style="color:var(--green-mid)">upload new ones</a>.
+              </div>
+
+              <div style="font-size:0.72rem;font-family:var(--font-mono);font-weight:700;text-transform:uppercase;color:var(--muted);letter-spacing:0.08em;margin-bottom:var(--space-sm)">Required for food products</div>
+              <div class="doc-attach-list">
+                <label class="doc-attach-item selected">
+                  <input type="checkbox" checked />
+                  <div class="doc-attach-meta">
+                    <div class="doc-attach-name">FSA Certificate — Jollof Mix</div>
+                    <div class="doc-attach-type"><span class="compliance-badge fsa" style="font-size:0.62rem;padding:1px 6px">FSA</span> · Expires Nov 2026</div>
+                  </div>
+                </label>
+                <label class="doc-attach-item">
+                  <input type="checkbox" />
+                  <div class="doc-attach-meta">
+                    <div class="doc-attach-name">Product Safety Conformity</div>
+                    <div class="doc-attach-type"><span class="compliance-badge opss" style="font-size:0.62rem;padding:1px 6px">OPSS</span> · Expires Aug 2026</div>
+                  </div>
+                </label>
+              </div>
+
+              <div style="font-size:0.72rem;font-family:var(--font-mono);font-weight:700;text-transform:uppercase;color:var(--muted);letter-spacing:0.08em;margin-top:var(--space-lg);margin-bottom:var(--space-sm)">Optional</div>
+              <div class="doc-attach-list">
+                <label class="doc-attach-item">
+                  <input type="checkbox" />
+                  <div class="doc-attach-meta">
+                    <div class="doc-attach-name">DCTS Tariff Certificate</div>
+                    <div class="doc-attach-type"><span class="compliance-badge dcts" style="font-size:0.62rem;padding:1px 6px">DCTS</span> · Expires Jan 2027</div>
+                  </div>
+                </label>
+                <label class="doc-attach-item">
+                  <input type="checkbox" />
+                  <div class="doc-attach-meta">
+                    <div class="doc-attach-name">UK Responsible Person Declaration</div>
+                    <div class="doc-attach-type"><span class="compliance-badge" style="background:rgba(142,68,173,0.1);color:#8e44ad;border:1px solid rgba(142,68,173,0.3);font-size:0.62rem;padding:1px 6px;border-radius:4px;font-family:var(--font-mono);font-weight:700">UKRP</span> · Expires Mar 2027</div>
+                  </div>
+                </label>
+              </div>
+
+              <div style="margin-top:var(--space-md);padding:var(--space-md);background:rgba(212,164,55,0.08);border:1.5px solid rgba(212,164,55,0.25);border-radius:var(--radius-md)">
+                <div style="font-size:0.76rem;color:#a0761a;font-weight:600;margin-bottom:3px">⚠️ Compliance Review</div>
+                <div style="font-size:0.74rem;color:var(--ink-mid)">Products are activated on the catalogue only after compliance documents are verified by the GUZE team.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Product visibility -->
+          <div class="form-card">
+            <div class="form-card-header">
+              <div style="width:28px;height:28px;border-radius:50%;background:var(--green-deep);display:flex;align-items:center;justify-content:center;font-size:0.78rem;color:white;font-weight:700;flex-shrink:0;font-family:var(--font-mono)">6</div>
+              <div>
+                <div class="form-card-title">Visibility</div>
+                <div class="form-card-subtitle">Who can see this product</div>
+              </div>
+            </div>
+            <div class="form-card-body" style="padding:var(--space-lg)">
+              <div style="display:flex;flex-direction:column;gap:var(--space-sm)">
+                <label style="display:flex;align-items:center;gap:var(--space-md);cursor:pointer;padding:10px;border-radius:var(--radius-md);border:1.5px solid var(--green-bright);background:rgba(34,168,107,0.06)">
+                  <input type="radio" name="visibility" value="all" checked style="accent-color:var(--green-bright)" />
+                  <div>
+                    <div style="font-size:0.85rem;font-weight:600;color:var(--ink-mid)">All Retailers</div>
+                    <div style="font-size:0.74rem;color:var(--muted)">Visible to all approved UK retailers</div>
+                  </div>
+                </label>
+                <label style="display:flex;align-items:center;gap:var(--space-md);cursor:pointer;padding:10px;border-radius:var(--radius-md);border:1.5px solid var(--cream-dark)">
+                  <input type="radio" name="visibility" value="approved" style="accent-color:var(--green-bright)" />
+                  <div>
+                    <div style="font-size:0.85rem;font-weight:600;color:var(--ink-mid)">Preferred Retailers</div>
+                    <div style="font-size:0.74rem;color:var(--muted)">Only retailers you've approved</div>
+                  </div>
+                </label>
+                <label style="display:flex;align-items:center;gap:var(--space-md);cursor:pointer;padding:10px;border-radius:var(--radius-md);border:1.5px solid var(--cream-dark)">
+                  <input type="radio" name="visibility" value="draft" style="accent-color:var(--green-bright)" />
+                  <div>
+                    <div style="font-size:0.85rem;font-weight:600;color:var(--ink-mid)">Draft / Private</div>
+                    <div style="font-size:0.74rem;color:var(--muted)">Not visible until you publish</div>
+                  </div>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Publish -->
+          <div class="publish-card">
+            <div class="publish-card-title">Ready to list?</div>
+            <div class="publish-card-hint">Your product will be submitted for compliance review before going live. Expect 1–2 working days.</div>
+            <div style="display:flex;flex-direction:column;gap:var(--space-sm)">
+              <button class="btn btn-white" onclick="submitProduct()">
+                Submit for Review →
+              </button>
+              <button class="btn btn-white-outline">
+                Save as Draft
+              </button>
+            </div>
+          </div>
+
+        </div><!-- /sidebar panel -->
+      </div><!-- /form layout -->
+
+    </div><!-- /page-body -->
+  </div><!-- /main-content -->
+</div><!-- /app-layout -->
+
+<script>
+  function removeTag(btn) {
+    btn.closest('.tag-pill').remove();
+  }
+
+  function handleTagInput(e, input) {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault();
+      const val = input.value.trim().replace(/,$/, '');
+      if (!val) return;
+      const pill = document.createElement('div');
+      pill.className = 'tag-pill';
+      pill.innerHTML = val + '<span class="tag-remove" onclick="removeTag(this)">×</span>';
+      input.parentNode.insertBefore(pill, input);
+      input.value = '';
+    }
+  }
+
+  function updatePriceStrip() {
+    const fob = parseFloat(document.getElementById('fob-price').value) || 0;
+    if (!fob) {
+      document.getElementById('strip-fob').textContent = '₦ —';
+      document.getElementById('strip-landed').textContent = '£ —';
+      document.getElementById('strip-retail').textContent = '£ —';
+      return;
+    }
+    // Rough illustrative calculation — real version uses BE pricing calculator
+    const exchangeRate = 0.00052; // ~1920 NGN per GBP
+    const fobGBP = fob * exchangeRate;
+    const landedGBP = fobGBP * 1.45; // freight, duty, clearance markup estimate
+    const retailGBP = landedGBP * 1.65; // retailer margin estimate
+    document.getElementById('strip-fob').textContent = '₦ ' + fob.toLocaleString('en-NG', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    document.getElementById('strip-landed').textContent = '£ ' + landedGBP.toFixed(2);
+    document.getElementById('strip-retail').textContent = '£ ' + retailGBP.toFixed(2);
+  }
+
+  function triggerImageUpload(idx) {
+    // In production: open file picker / image cropper
+    alert('Image upload slot ' + (idx + 1) + ' — wire to POST /api/v1/Products (multipart form data)');
+  }
+
+  function submitProduct() {
+    // Wire to POST /api/v1/Products
+    alert('Product submitted for compliance review. You\'ll receive a notification when it goes live.');
+  }
+</script>
+</body>
+</html>
